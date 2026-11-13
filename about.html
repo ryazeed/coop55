@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title data-t="nav.about">About · E-COOP</title>
+<link rel="icon" href="assets/img/favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" id="bootstrap-css" href="assets/vendor/bootstrap/bootstrap.min.css">
+<link rel="stylesheet" href="assets/css/main.css">
+<link rel="stylesheet" href="assets/css/dashboard.css">
+<link rel="stylesheet" href="assets/css/auth.css">
+<link rel="stylesheet" id="rtl-css" href="assets/css/rtl.css">
+<link rel="stylesheet" href="assets/css/app.css">
+<script src="js/lang.js"></script>
+</head>
+<body class="site-body">
+<a class="skip-link" href="#main" data-t="a11y.skip">Skip to content</a>
+<!-- ===== header ===== -->
+<header class="site-header">
+  <div class="site-wrap site-header__inner">
+    <a class="site-logo" href="index.html"><img src="assets/img/logo.png" alt="" width="78" height="44"><span>E-COOP</span></a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="index.html" data-t="nav.home">Home</a>
+      <a href="about.html" aria-current="page" data-t="nav.about">About</a>
+      <a href="faq.html" data-t="nav.faq">FAQ</a>
+      <a href="contact.html" data-t="nav.contact">Contact</a>
+    </nav>
+    <div class="site-header__end">
+      <button type="button" class="co-iconbtn app-themebtn app-themebtn--sm" onclick="switchTheme()" title="Switch light / dark mode" data-t-title="theme.toggle"><span class="app-themebtn__moon"><svg class="co-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></span><span class="app-themebtn__sun"><svg class="co-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></span></button>
+      <button type="button" class="co-btn co-btn--soft co-btn--sm" onclick="switchLanguage()"><svg class="co-ico co-ico--sm" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span data-t="language">العربية</span></button>
+      <a class="co-btn co-btn--sm" href="login.html" id="login-link" data-t="auth.login">Log in</a>
+      <a class="co-btn co-btn--primary co-btn--sm d-none d-sm-inline-flex" href="register.html" id="register-link" data-t="auth.register">Register</a>
+      <a class="co-btn co-btn--primary co-btn--sm" href="login.html" id="open-app" hidden data-t="nav.dashboard">Dashboard</a>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="site-main" tabindex="-1">
+<section class="site-wrap narrow">
+  <h1 class="section-title section-title--lg" data-t="about.title">About E-COOP</h1>
+  <p class="hero__lead" data-t="about.p1">E-COOP is the cooperative training management system of Jubail Industrial College. It replaces paper forms and email threads with one place for students, companies, academic supervisors and the co-op office.</p>
+  <div class="row g-3 mt-2">
+    <div class="col-sm-6"><div class="co-card h-100"><div class="co-card__head"><span class="co-tile co-tile--lavender"><svg class="co-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg></span><h2 class="co-card__title" data-t="role.Student">Student</h2></div>
+      <p class="co-caption steps__text" data-t="about.Student">Builds a profile, applies to opportunities, checks in daily, uploads the final report and sees evaluations.</p></div></div>
+    <div class="col-sm-6"><div class="co-card h-100"><div class="co-card__head"><span class="co-tile co-tile--lavender"><svg class="co-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2M10 21v-3h4v3"/></svg></span><h2 class="co-card__title" data-t="role.Company">Company</h2></div>
+      <p class="co-caption steps__text" data-t="about.Company">Posts opportunities, reviews applicants and CVs, generates the daily code and evaluates trainees.</p></div></div>
+    <div class="col-sm-6"><div class="co-card h-100"><div class="co-card__head"><span class="co-tile co-tile--lavender"><svg class="co-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6.5 6.5 0 0 1 3.5 6"/></svg></span><h2 class="co-card__title" data-t="role.Supervisor">Academic supervisor</h2></div>
+      <p class="co-caption steps__text" data-t="about.Supervisor">Follows assigned students, approves attendance, reviews final reports and gives the academic evaluation.</p></div></div>
+    <div class="col-sm-6"><div class="co-card h-100"><div class="co-card__head"><span class="co-tile co-tile--lavender"><svg class="co-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3 5 6v6c0 4.4 3 7.8 7 9 4-1.2 7-4.6 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span><h2 class="co-card__title" data-t="role.Admin">Admin</h2></div>
+      <p class="co-caption steps__text" data-t="about.Admin">Approves companies and opportunities, assigns supervisors, manages users and reads analytics and the audit log.</p></div></div>
+  </div>
+  <p class="mt-4"><a class="co-btn co-btn--soft" href="privacy.html"><svg class="co-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3 5 6v6c0 4.4 3 7.8 7 9 4-1.2 7-4.6 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg><span data-t="about.privacy_t">Privacy notice</span></a> <a class="co-btn co-btn--soft" href="faq.html"><svg class="co-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h0"/></svg><span data-t="nav.faq">FAQ</span></a></p>
+</section>
+</main>
+
+<footer class="site-footer">
+  <div class="site-wrap site-footer__inner">
+    <span class="site-footer__brand"><img src="assets/img/logo-mark.png" alt="" width="28" height="28">© 2026 E-COOP · <span data-t="footer.college">Jubail Industrial College</span></span>
+    <span><a href="about.html" data-t="nav.about">About</a> · <a href="faq.html" data-t="nav.faq">FAQ</a> · <a href="privacy.html" data-t="nav.privacy">Privacy</a> · <a href="contact.html" data-t="nav.contact">Contact</a></span>
+  </div>
+</footer>
+<div class="app-toasts" id="toasts" aria-live="polite"></div>
+<script src="js/icons.js"></script>
+<script src="js/main.js"></script>
+<script src="js/public.js"></script>
+<script>startPage(null, renderPublic);</script>
+</body>
+</html>
