@@ -77,3 +77,11 @@ button.co-row { font: inherit; color: inherit; text-align: start; width: 100%; c
 .app-chat__new .co-input { flex: 1; min-width: 0; }
 .app-chatrow .co-row__text, .app-chat__thread .co-row__text { min-width: 0; }
 .app-chat__thread { grid-template-columns: minmax(0, 1fr); }
+
+/* Logo: light version in light theme, night version in dark theme (no tile behind it) */
+img[data-logo="dark"] { display: none !important; }
+[data-theme="dark"] img[data-logo="light"] { display: none !important; }
+[data-theme="dark"] img[data-logo="dark"] { display: block !important; }
+.site-logo img[data-logo], .app-brand img[data-logo], .site-footer__brand img[data-logo] { flex: none; }
+[data-theme="dark"] .site-logo img[data-logo="dark"], [data-theme="dark"] .app-brand img[data-logo="dark"], [data-theme="dark"] .site-footer__brand img[data-logo="dark"] { display: inline-block !important; }
+.app-rail a.app-logo:hover { background: none; }

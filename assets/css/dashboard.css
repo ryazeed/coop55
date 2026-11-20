@@ -353,11 +353,10 @@ a.co-iconbtn:hover { color: var(--ink); }
 }
 
 /* Logo */
-.app-logo { width: 44px !important; height: 44px !important; padding: 0; border-radius: 12px; background: #f4f5f7; overflow: hidden; }
+.app-logo { width: 44px !important; height: 44px !important; padding: 0; background: none; overflow: hidden; }
 .app-logo img { width: 44px; height: 44px; display: block; }
 .app-brand { display: inline-flex; align-items: center; gap: 10px; }
 .app-brand__logo { height: 35px; width: auto; }
-[data-theme="dark"] .app-brand__logo { background: #f4f5f7; border-radius: 8px; padding: 2px 4px; }
 
 /* Language button + avatar photo button */
 .app-langbtn { height: 44px; padding: 0 var(--space-4); background: var(--surface); box-shadow: var(--shadow-card); font-weight: 600; }
@@ -385,8 +384,6 @@ a.co-iconbtn:hover { color: var(--ink); }
 [data-theme="dark"] .app-themebtn .app-themebtn__moon { display: none; }
 .app-themebtn span { display: inline-grid; }
 .app-themebtn--sm { width: 36px; height: 36px; box-shadow: none; background: var(--surface-sunken); }
-/* Logo lines are navy: give them a light tile in dark mode */
-[data-theme="dark"] .site-logo img, [data-theme="dark"] .auth__logo { background: #f4f5f7; border-radius: 10px; padding: 3px 6px; }
 
 /* Definition lists, FAQ, report */
 .app-dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-3) var(--space-5); margin: 0; }
