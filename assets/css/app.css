@@ -109,3 +109,9 @@ img[data-logo="dark"] { display: none !important; }
   .hero__stats > div + div { padding-inline-start: var(--space-3); }
   .hero__stats dd { font-size: 24px; }
 }
+/* Keep the three registration buttons on one row on wide screens */
+@media (min-width: 992px) {
+  .hero { grid-template-columns: 1.45fr 1fr; }
+  .hero__actions { flex-wrap: nowrap; }
+  .hero__actions .co-btn { padding: 0 var(--space-4); }
+}
