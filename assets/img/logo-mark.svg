@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="430 25 790 790" role="img" aria-label="E-COOP">
+  <defs>
+    <linearGradient id="gE" gradientUnits="userSpaceOnUse" x1="100" y1="0" x2="555" y2="0">
+      <stop offset="0" stop-color="#1e2f5c"/><stop offset="1" stop-color="#14837f"/>
+    </linearGradient>
+    <linearGradient id="gC" gradientUnits="userSpaceOnUse" x1="470" y1="560" x2="880" y2="190">
+      <stop offset="0" stop-color="#2f4a5e"/><stop offset=".35" stop-color="#4b7f46"/><stop offset="1" stop-color="#72a8c4"/>
+    </linearGradient>
+    <linearGradient id="gO1" gradientUnits="userSpaceOnUse" x1="483" y1="0" x2="887" y2="0">
+      <stop offset="0" stop-color="#363a73"/><stop offset="1" stop-color="#a88dc6"/>
+    </linearGradient>
+    <linearGradient id="gO2" gradientUnits="userSpaceOnUse" x1="670" y1="0" x2="1076" y2="0">
+      <stop offset="0" stop-color="#2b4b94"/><stop offset=".55" stop-color="#3e5fae"/><stop offset="1" stop-color="#9c88c4"/>
+    </linearGradient>
+    <linearGradient id="gP" gradientUnits="userSpaceOnUse" x1="905" y1="0" x2="1190" y2="0">
+      <stop offset="0" stop-color="#3554a6"/><stop offset="1" stop-color="#a48ec8"/>
+    </linearGradient>
+    <clipPath id="cutE"><polygon points="0,0 518,0 492,140 0,140 0,680 530,680 560,760 0,760"/></clipPath>
+  </defs>
+
+
+  <g fill="none" stroke-width="28" stroke-linecap="round" stroke-linejoin="round">
+    <!-- C : open hexagon -->
+    <path stroke="url(#gC)" d="M858 268L798 170H570L455 368L570 566H798L858 466"/>
+    <!-- O -->
+    <path stroke="url(#gO1)" opacity=".92" d="M584 355H786L887 530L786 705H584L483 530Z"/>
+    <!-- O -->
+    <path stroke="url(#gO2)" opacity=".92" d="M772 297H974L1075 472L974 647H772L671 472Z"/>
+    <!-- P : hexagon bowl + stem -->
+    <path stroke="url(#gP)" opacity=".95" d="M1045 105L1179 182.5V337.5L1045 415L911 337.5V182.5Z M965 368.5V630"/>
+  </g>
+</svg>
