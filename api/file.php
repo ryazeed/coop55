@@ -11,7 +11,8 @@ handle(function () {
         $p = val('SELECT avatar_path FROM users WHERE user_id = ?', [(int)$_GET['avatar']]);
         $path = $p ? ECOOP_ROOT . '/storage/' . $p : null;
         if (!$path || !is_file($path)) fail('No photo.', 'not_found', 404);
-        header('Content-Type: ' . (mime_content_type($path) ?: 'image/jpeg'));
+        $types = ['png' => 'image/png', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'webp' => 'image/webp'];
+        header('Content-Type: ' . ($types[strtolower(pathinfo($path, PATHINFO_EXTENSION))] ?? 'image/jpeg'));
         header('Cache-Control: private, max-age=86400');
         readfile($path);
         exit;

@@ -15,8 +15,14 @@ function loadReport(kind, params) {
   Object.keys(params || {}).forEach(function (k) { if (params[k]) query += '&' + k + '=' + encodeURIComponent(params[k]); });
   var pdf = document.getElementById('pdf-btn');
   pdf.href = ROOT + 'api/report.php?' + query + '&format=pdf';
+  // the button always asks for the file itself, so an error from the server is shown and never saved as a file
+  pdf.onclick = function (e) { e.preventDefault(); if (!pdf.classList.contains('disabled')) downloadPDF(pdf); };
   return api('report.php?' + query).then(function (res) {
-    if (!res.ok) { toast(res.error, true); return; }
+    if (!res.ok) {
+      toast(res.error, true);
+      setHTML('report-body', '<tr><td class="app-err">' + esc(res.error || 'Error') + '</td></tr>');     // show why the report could not load
+      return;
+    }
     showReport(res.report);
   });
 }
@@ -40,7 +46,6 @@ function showReport(r) {
   var pdf = document.getElementById('pdf-btn');
   pdf.classList.toggle('disabled', empty);
   pdf.setAttribute('aria-disabled', empty ? 'true' : 'false');
-  pdf.onclick = function (e) { e.preventDefault(); if (!empty) downloadPDF(pdf); };
   document.getElementById('csv-btn').disabled = empty;
   document.getElementById('csv-btn').onclick = function () {
     downloadCSV(r);

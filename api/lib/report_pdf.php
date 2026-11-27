@@ -5,6 +5,14 @@
  * summary boxes, the table (its header repeats on every page), signature lines and page numbers.
  * Arabic reports are right-to-left; English words and numbers inside Arabic text keep their order.
  */
+/* TCPDF lists cURL settings (to download images from the internet, which E-COOP never does).
+   XAMPP often has the PHP cURL extension turned off, and then PHP stops with "Undefined constant CURLOPT_...".
+   Without cURL these names get placeholder numbers; they are never used because TCPDF checks function_exists('curl_init'). */
+if (!extension_loaded('curl')) {
+    foreach (['CURLINFO_HTTP_CODE', 'CURLOPT_CONNECTTIMEOUT', 'CURLOPT_FAILONERROR', 'CURLOPT_FOLLOWLOCATION', 'CURLOPT_MAXREDIRS', 'CURLOPT_PROTOCOLS', 'CURLOPT_RETURNTRANSFER', 'CURLOPT_SSL_VERIFYHOST', 'CURLOPT_SSL_VERIFYPEER', 'CURLOPT_TIMEOUT', 'CURLOPT_URL', 'CURLOPT_USERAGENT', 'CURLPROTO_FTP', 'CURLPROTO_FTPS', 'CURLPROTO_HTTP', 'CURLPROTO_HTTPS'] as $i => $name) {
+        if (!defined($name)) define($name, 90000 + $i);
+    }
+}
 require_once __DIR__ . '/tcpdf/tcpdf.php';
 
 class EcoopPdf extends TCPDF {
