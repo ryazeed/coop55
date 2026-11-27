@@ -22,6 +22,7 @@ function renderSettings() {
   setupChips('set-lang', 'data-value', LANG, function (v) { localStorage.setItem('ecoop-lang', v); location.reload(); });
   setupChips('set-theme', 'data-value', document.documentElement.getAttribute('data-theme') || 'dark', function (v) { switchTheme(v); renderSettings(); });
 
+  if (ME.role === 'Student') showMyCv();
   if (settingsReady) return;
   settingsReady = true;
 
@@ -64,7 +65,7 @@ function setupStudentProfile() {
   document.getElementById('p-phone').value = st.phone || '';
   document.getElementById('p-gpa').value = st.gpa;
   document.getElementById('p-major').value = st.major;
-  if (st.cv) setText('p-cv-name', st.cv);
+
   document.getElementById('p-cv').onchange = function () { if (this.files[0]) setText('p-cv-name', this.files[0].name); };
 
   document.getElementById('profile-form').onsubmit = function (e) {
@@ -78,9 +79,23 @@ function setupStudentProfile() {
     setText('p-phone-err', !/^05\d{8}$/.test(phone) ? t('phoneError') : ''); if (!/^05\d{8}$/.test(phone)) ok = false;
     setText('p-gpa-err', isNaN(g) || g < 0 || g > 4 ? t('gpaError') : ''); if (isNaN(g) || g < 0 || g > 4) ok = false;
     if (cvFile && !/\.(pdf|docx)$/i.test(cvFile.name)) { toast(t('fileTypeError'), true); ok = false; }
+    if (cvFile && cvFile.size > 10 * 1024 * 1024) { toast(t('fileSizeError'), true); ok = false; }
     if (!ok) return;
     var major = document.getElementById('p-major').value;
-    act({ type: 'profile', fields: { phone: phone, gpa: gpa, major: major, cv: cvFile ? cvFile.name : myStudent().cv }, userFields: { name: name } }, t('profile.saved'), renderSettings);
+    var btn = document.querySelector('#profile-form button[type=submit]');
+    var save = function (cvKey) {
+      act({ type: 'profile', fields: { phone: phone, gpa: gpa, major: major, cvKey: cvKey || '' }, userFields: { name: name } }, t('profile.saved'), renderSettings)
+        .then(function () { btn.disabled = false; document.getElementById('p-cv').value = ''; });
+    };
+    btn.disabled = true;
+    if (!cvFile) { save(''); return; }
+    // 1) upload the CV (PDF or DOCX, checked by PHP)  2) save the profile with it
+    var key = 'cv' + Date.now(), data = new FormData();
+    data.append('key', key); data.append('file', cvFile, cvFile.name);
+    fetch(ROOT + 'api/upload.php', { method: 'POST', body: data, credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (up) {
+      if (!up.ok) { btn.disabled = false; toast(up.error, true); return; }
+      save(key);
+    }).catch(function () { btn.disabled = false; toast(t('serverUnreachable'), true); });
   };
 }
 
@@ -119,4 +134,12 @@ function setupEmail() {
       renderSettings();
     });
   };
+}
+
+/* the saved CV: its name, a link to open it, and a warning while there is none (refreshed after every save) */
+function showMyCv() {
+  var st = myStudent();
+  if (st.cv) setText('p-cv-name', st.cv);
+  setHTML('p-cv-view', st.cv ? '<a href="' + cvLink(st) + '" target="_blank" rel="noopener">' + icon('doc', true) + t('viewMyCv') + '</a>' : '');
+  show('p-cv-alert', !st.cv);
 }

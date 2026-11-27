@@ -1952,7 +1952,7 @@ Object.assign(I18N.en, {
   account: 'Account', collegeEmailHelp: 'Students and supervisors use an @gmail.com or @jic.edu.sa address.',
   reCollege: 'Use an e-mail ending in @gmail.com or @jic.edu.sa.', eEmail: 'Enter your email, for example name@gmail.com.',
   rCollegeEmail: 'Email', 'auth.inst_email': 'Email', 'auth.staff_email': 'Email',
-  completeProfileD: 'Add your phone and GPA before you apply.', cvNameHelp: 'PDF or DOCX. The file name is saved with your profile.',
+  completeProfileD: 'Add your phone, GPA and CV before you apply.', cvNameHelp: 'PDF or DOCX, up to 10 MB. Companies you apply to can open it.',
   privacyUpdated: 'Last updated 1 November 2026', sendAnother: 'Send another message',
   topicCompany: 'Company registration', topicStudent: 'Student question', topicSupport: 'Technical support', topicOther: 'Other',
   settingsSub: 'Profile, photo, notifications, language and theme.', usersSub: 'Activate or suspend accounts.',
@@ -1962,10 +1962,10 @@ Object.assign(I18N.en, {
   companyNameLabel: 'Company name', trainees: 'trainees', notAssigned: 'Not assigned', viewDetails: 'Details', evaluated: 'Evaluated',
   'profile.gpa_help': 'Out of 4.00.', 'report.not_ready': 'You can upload once you have a placement.',
   'apply.note': 'The company sees your profile. Accepting another offer withdraws this application.',
-  'faq.q1_a': 'Add your phone and GPA in Settings, open Opportunities, choose one and press Apply now. Some opportunities ask for a minimum GPA. You can follow every application under My applications.',
+  'faq.q1_a': 'Add your phone, GPA and CV in Settings, open Opportunities, choose one and press Apply now. Some opportunities ask for a minimum GPA. You can follow every application under My applications.',
   'faq.q7_a': 'Every new opportunity is reviewed by the co-op office first. You are notified when it is approved.',
   'home.step2': 'Students complete their profile and apply. Companies accept or reject.',
-  'dash.complete_profile_d': 'Add your phone and GPA before you apply.', 'settings.sub': 'Profile, notifications, language and theme.',
+  'dash.complete_profile_d': 'Add your phone, GPA and CV before you apply.', 'settings.sub': 'Profile, notifications, language and theme.',
   reply: 'Reply', reportDue: 'Report due', eLocked: 'Too many wrong passwords. The account is locked for 15 minutes.',
   nPlacementDone: 'Your training at “{o}” was marked completed.', 'admin.complete_confirm': 'Mark this placement completed? The academic evaluation opens after this.',
   'opp.close_confirm': 'Close this opportunity? Students who are still waiting will be told it closed.',
@@ -1981,13 +1981,17 @@ Object.assign(I18N.en, {
   /* change e-mail and major */
   emailCard: 'Sign-in e-mail', currentPass: 'Current password', currentPassHelp: 'Needed to confirm the change.',
   saveEmail: 'Change e-mail', emailSaved: 'E-mail changed. Use the new one next time you sign in.', eSameEmail: 'This is already your e-mail.',
-  majorHelp: 'Opportunities are matched to your major.'
+  majorHelp: 'Opportunities are matched to your major.',
+  /* CV */
+  cvAlertTitle: 'Upload your CV first.', cvRequired: 'You must upload your CV (PDF or DOCX) before you can apply to an opportunity.',
+  cvUploadNow: 'Upload CV', viewCv: 'CV', noCv: 'No CV uploaded', viewMyCv: 'Open my CV', cvAttached: 'Your CV {f} is sent with the application.',
+  fileSizeError: 'The file must be 10 MB or smaller.'
 });
 Object.assign(I18N.ar, {
   account: 'الحساب', collegeEmailHelp: 'الطلاب والمشرفون يستخدمون بريد ‎@gmail.com أو ‎@jic.edu.sa.',
   reCollege: 'استخدم بريدًا ينتهي بـ ‎@gmail.com أو ‎@jic.edu.sa.', eEmail: 'أدخل بريدك الإلكتروني، مثل name@gmail.com.',
   rCollegeEmail: 'البريد الإلكتروني', 'auth.inst_email': 'البريد الإلكتروني', 'auth.staff_email': 'البريد الإلكتروني',
-  completeProfileD: 'أضف رقم جوالك ومعدلك قبل التقديم.', cvNameHelp: 'PDF أو DOCX. يُحفظ اسم الملف مع ملفك الشخصي.',
+  completeProfileD: 'أضف رقم جوالك ومعدلك وسيرتك الذاتية قبل التقديم.', cvNameHelp: 'PDF أو DOCX حتى 10 ميجابايت. تطّلع عليها الشركات التي تقدّم لها.',
   privacyUpdated: 'آخر تحديث 1 نوفمبر 2026', sendAnother: 'إرسال رسالة أخرى',
   topicCompany: 'تسجيل شركة', topicStudent: 'استفسار طالب', topicSupport: 'دعم فني', topicOther: 'أخرى',
   settingsSub: 'الملف الشخصي والصورة والإشعارات واللغة والمظهر.', usersSub: 'تفعيل الحسابات أو إيقافها.',
@@ -1997,10 +2001,10 @@ Object.assign(I18N.ar, {
   companyNameLabel: 'اسم الشركة', trainees: 'متدربين', notAssigned: 'غير معيّن', viewDetails: 'التفاصيل', evaluated: 'تم التقييم',
   'profile.gpa_help': 'من 4.00.', 'report.not_ready': 'يمكنك الرفع بعد التحاقك بتدريب.',
   'apply.note': 'تطّلع الشركة على ملفك. قبولك في فرصة أخرى يسحب هذا الطلب.',
-  'faq.q1_a': 'أضف رقم جوالك ومعدلك من الإعدادات، ثم افتح الفرص واختر فرصة واضغط «قدّم الآن». بعض الفرص تشترط حدًا أدنى للمعدل. تابع كل طلباتك من «طلباتي».',
+  'faq.q1_a': 'أضف رقم جوالك ومعدلك وسيرتك الذاتية من الإعدادات، ثم افتح الفرص واختر فرصة واضغط «قدّم الآن». بعض الفرص تشترط حدًا أدنى للمعدل. تابع كل طلباتك من «طلباتي».',
   'faq.q7_a': 'يراجع مكتب التدريب كل فرصة جديدة أولًا، ويصلك إشعار عند اعتمادها.',
   'home.step2': 'يكمل الطلاب ملفاتهم ويقدّمون على الفرص، والشركات تقبل أو ترفض.',
-  'dash.complete_profile_d': 'أضف رقم جوالك ومعدلك قبل التقديم.', 'settings.sub': 'الملف الشخصي والإشعارات واللغة والمظهر.',
+  'dash.complete_profile_d': 'أضف رقم جوالك ومعدلك وسيرتك الذاتية قبل التقديم.', 'settings.sub': 'الملف الشخصي والإشعارات واللغة والمظهر.',
   reply: 'رد', reportDue: 'موعد تسليم التقرير', eLocked: 'محاولات كثيرة بكلمة مرور خاطئة. تم قفل الحساب 15 دقيقة.',
   nPlacementDone: 'تم اعتماد اكتمال تدريبك في «{o}».', 'admin.complete_confirm': 'هل تريد اعتماد اكتمال هذا التدريب؟ بعدها يُفتح التقييم الأكاديمي.',
   'opp.close_confirm': 'هل تريد إغلاق هذه الفرصة؟ سيُبلَّغ الطلاب المنتظرون بإغلاقها.',
@@ -2016,7 +2020,11 @@ Object.assign(I18N.ar, {
   /* تغيير البريد والتخصص */
   emailCard: 'البريد الإلكتروني لتسجيل الدخول', currentPass: 'كلمة المرور الحالية', currentPassHelp: 'مطلوبة لتأكيد التغيير.',
   saveEmail: 'تغيير البريد', emailSaved: 'تم تغيير البريد. استخدم البريد الجديد في تسجيل الدخول القادم.', eSameEmail: 'هذا هو بريدك الحالي.',
-  majorHelp: 'تظهر لك الفرص المناسبة لتخصصك.'
+  majorHelp: 'تظهر لك الفرص المناسبة لتخصصك.',
+  /* السيرة الذاتية */
+  cvAlertTitle: 'ارفع سيرتك الذاتية أولًا.', cvRequired: 'لازم ترفع سيرتك الذاتية (PDF أو DOCX) قبل ما تقدر تقدّم على أي فرصة.',
+  cvUploadNow: 'ارفع السيرة الذاتية', viewCv: 'السيرة الذاتية', noCv: 'لم يرفع سيرة ذاتية', viewMyCv: 'فتح سيرتي الذاتية', cvAttached: 'سيرتك الذاتية {f} تُرسل مع الطلب.',
+  fileSizeError: 'حجم الملف لازم يكون 10 ميجابايت أو أقل.'
 });
 
 /* ---------- start: theme (dark by default) and right-to-left Bootstrap for Arabic, before the page is drawn ---------- */

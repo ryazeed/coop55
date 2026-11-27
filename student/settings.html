@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="../assets/css/dashboard.css?v=9e5bf30f">
 <link rel="stylesheet" id="rtl-css" href="../assets/css/rtl.css?v=bcf359de">
 <link rel="stylesheet" href="../assets/css/app.css?v=8548c1a9">
-<script src="../js/lang.js?v=8138a37d"></script>
+<script src="../js/lang.js?v=61f6bdc8"></script>
 </head>
 <body class="app-body">
 <a class="skip-link" href="#main" data-t="a11y.skip">Skip to content</a>
@@ -104,7 +104,9 @@
           </select><span class="co-field__help" data-t="majorHelp">Opportunities are matched to your major.</span></div>
         <div class="co-field"><span class="set-label" data-t="profile.cv">CV</span>
           <label class="set-upload" for="p-cv"><svg class="co-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg><span id="p-cv-name" data-t="settings.upload_cv">Upload CV</span></label>
-          <input class="visually-hidden" id="p-cv" type="file" accept=".pdf,.docx"><span class="co-field__help" data-t="cvNameHelp">PDF or DOCX. The file name is saved with your profile.</span></div>
+          <input class="visually-hidden" id="p-cv" type="file" accept=".pdf,.docx"><span class="co-field__help" data-t="cvNameHelp">PDF or DOCX, up to 10 MB. Companies you apply to can open it.</span>
+          <span class="co-caption" id="p-cv-view"></span>
+          <div class="co-alert co-alert--amber mt-2" id="p-cv-alert" role="status" hidden><svg class="co-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h0"/></svg><div data-t="cvRequired">You must upload your CV (PDF or DOCX) before you can apply to an opportunity.</div></div></div>
         <div class="set-actions"><button class="co-btn co-btn--primary" type="submit" data-t="settings.save_profile">Save Profile</button></div>
     </form>
 
@@ -187,9 +189,9 @@
 </div>
 <script src="../assets/vendor/bootstrap/bootstrap.bundle.min.js?v=90c4b26d"></script>
 <script src="../js/icons.js?v=14837cba"></script>
-<script src="../js/main.js?v=c801b15a"></script>
-<script src="../js/student.js?v=01655b63"></script>
-<script src="../js/settings.js?v=0e42ec15"></script>
+<script src="../js/main.js?v=ec02a8a7"></script>
+<script src="../js/student.js?v=0e70731b"></script>
+<script src="../js/settings.js?v=6d92313c"></script>
 <script>startPage('Student', renderSettings);</script>
 </body>
 </html>

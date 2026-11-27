@@ -33,6 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // remove files uploaded during earlier demos (the two sample reports stay)
         foreach (array_merge(glob(__DIR__ . '/storage/uploads/*') ?: [], glob(__DIR__ . '/storage/avatars/*.*') ?: []) as $f) if (is_file($f)) @unlink($f);
         foreach (glob(__DIR__ . '/storage/reports/*') ?: [] as $f) if (is_file($f) && !str_starts_with(basename($f), 'demo_')) @unlink($f);
+        foreach (glob(__DIR__ . '/storage/cv/u_*') ?: [] as $f) if (is_file($f)) @unlink($f);
         $ok = true;
         $msg = "Done: the database \"{$cfg['db_name']}\" was created with the demo data ($steps SQL statements).";
     } catch (Throwable $e) {

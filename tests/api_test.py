@@ -218,9 +218,31 @@ check('chat: sign-in required', U().act(type='sendMsg', chat='ch1', text='hi').g
 # ---------------------------------------------------------------- withdraw, close an opportunity, complete a placement, contact inbox
 hd = reg; hst = hd.state()                                              # the student registered above (not placed)
 href = [u for u in hst['state']['users'] if u['id'] == hst['me']][0]['ref']
+# ---------------------------------------------------------------- CV: needed before applying; the companies applied to can open it
+openo = [o for o in hst['state']['opps'] if o['status'] == 'Open']
+check('cannot apply without a CV', hd.act(type='apply', opp=openo[0]['id'])['code'] == 'cv_missing')
+def upload(sess, name, content, key):
+    return sess.s.post(BASE + '/api/upload.php', data={'key': key}, files={'file': (name, content, 'application/octet-stream')}).json()
+check('CV upload checks the real file content', upload(hd, 'Fake_CV.pdf', b'hello world', 'cvfake1')['code'] == 'validation')
+PDF = b'%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n'
+check('CV uploads (PDF)', upload(hd, 'Sara_CV.pdf', PDF, 'cvtest1')['ok'])
+r = hd.act(type='profile', fields={'phone': '0551112223', 'gpa': '3.60', 'cvKey': 'cvtest1'}, userFields={'name': 'Sara Test'})
+me_st = [x for x in r['state']['students'] if x['id'] == href][0]
+check('CV saved with the profile (original name kept)', r['ok'] and me_st['cv'] == 'Sara_CV.pdf' and me_st['cvDate'], r.get('error'))
+check('upload key works only once', hd.act(type='profile', fields={'phone': '0551112223', 'gpa': '3.60', 'cvKey': 'cvtest1'}, userFields={'name': 'Sara Test'})['code'] == 'validation')
+cvurl = BASE + '/api/file.php?cv=' + href[1:]
+check('student opens own CV', hd.s.get(cvurl).content.startswith(b'%PDF'))
+companies = {'c1': gulf, 'c2': east}
+check('company cannot open the CV before the student applies', companies[openo[0]['company']].s.get(cvurl).status_code == 403)
+check('another student cannot open the CV', ahmed.s.get(cvurl).status_code == 403)
+check('the office can open any CV', admin.s.get(cvurl).content.startswith(b'%PDF'))
+check('CV link needs sign-in', U().s.get(cvurl).status_code == 401)
+check('company opens a demo applicant CV', east.s.get(BASE + '/api/file.php?cv=7').content.startswith(b'%PDF'))
+check('demo DOCX CV is served as Word', admin.s.get(BASE + '/api/file.php?cv=3').headers.get('Content-Type', '').startswith('application/vnd.openxmlformats'))
 for o in hst['state']['opps']:                                           # one pending application
-    if o['status'] == 'Open' and hd.act(type='apply', opp=o['id'])['ok']: break
+    if o['status'] == 'Open' and hd.act(type='apply', opp=o['id'])['ok']: applied = o; break
 mine = [x for x in hd.state()['state']['apps'] if x['student'] == href and x['status'] == 'Submitted']
+check('company opens the CV after the student applies', companies[applied['company']].s.get(cvurl).content.startswith(b'%PDF'))
 if mine:
     check('withdraw: another student cannot withdraw it', yz.act(type='withdraw', id=mine[0]['id']).get('code') == 'forbidden')
     r = hd.act(type='withdraw', id=mine[0]['id']); check('withdraw: student withdraws a pending application', r['ok'] and [x for x in r['state']['apps'] if x['id'] == mine[0]['id']][0]['status'] == 'Withdrawn', r.get('error'))

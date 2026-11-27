@@ -48,6 +48,8 @@ function act_apply(array $a): void {                                   // UC-03
     $o = one('SELECT o.*, c.user_id AS cuser FROM coop_opportunities o JOIN companies c ON c.company_id = o.company_id WHERE o.opportunity_id = ?', [$oid]);
     if (!$o) fail('Opportunity not found.', 'not_found', 404);
     if (val('SELECT 1 FROM applications WHERE student_id = ? AND opportunity_id = ?', [$u['student_id'], $oid])) fail('You already applied to this opportunity.', 'duplicate');
+    // the company reads the CV with the application, so it is needed first
+    if (!val('SELECT cv_file_path FROM students WHERE student_id = ?', [$u['student_id']])) fail('Upload your CV (PDF or DOCX) in Settings before applying.', 'cv_missing');
     if ($o['min_gpa'] !== null) {                                      // minimum GPA set by the company
         $gpa = val('SELECT gpa FROM students WHERE student_id = ?', [$u['student_id']]);
         if ($gpa === null) fail('Add your GPA in Settings before applying to this opportunity.', 'gpa_missing');
@@ -141,22 +143,33 @@ function act_profile(array $a): void {                                 // studen
     if ($phone !== '' && !preg_match('/^0\d{8,9}$/', $phone)) fail('Phone must look like 05XXXXXXXX.', 'validation');
     $gpa = $f['gpa'] ?? null;
     if ($gpa !== null && $gpa !== '' && (!is_numeric($gpa) || $gpa < 0 || $gpa > 4)) fail('GPA must be between 0 and 4.', 'validation');
-    $cv = trim((string)($f['cv'] ?? ''));
-    $cvPath = $cv !== '' && preg_match('/\.(pdf|docx)$/i', $cv) ? 'cv/' . basename($cv) : null;
+    // a new CV comes as an upload key from upload.php (checked there: PDF or DOCX, real content, max 10 MB); no key keeps the current CV
+    $cvKey = (string)($f['cvKey'] ?? '');
+    $staged = $cvKey !== '' ? take_staged_upload((int)$u['user_id'], $cvKey) : null;
     $name = text_in($uf, 'name', 150);
     // the major is optional in the request: empty keeps the current one
     $majorName = trim((string)($f['major'] ?? ''));
     $major = $majorName === '' ? null : val('SELECT major_id FROM majors WHERE major_name = ?', [$majorName]);
     if ($majorName !== '' && !$major) fail('Choose a major from the list.', 'validation');
-    tx(function () use ($u, $phone, $gpa, $cvPath, $name, $major, $majorName) {
+    tx(function () use ($u, $phone, $gpa, $staged, $name, $major, $majorName) {
         $old = val('SELECT major_id FROM students WHERE student_id = ?', [$u['student_id']]);
         if ($major && (int)$major !== (int)$old) {
             q('UPDATE students SET major_id = ? WHERE student_id = ?', [$major, $u['student_id']]);
             audit((int)$u['user_id'], 'Changed major to ' . $majorName, 'STUDENT', (int)$u['student_id']);
         }
         q('UPDATE users SET full_name = ?, phone = ? WHERE user_id = ?', [$name, $phone ?: null, $u['user_id']]);
-        q('UPDATE students SET gpa = ?, cv_file_path = ?, cv_uploaded_at = IF(? IS NULL, NULL, COALESCE(cv_uploaded_at, NOW())) WHERE student_id = ?',
-            [$gpa === '' ? null : $gpa, $cvPath, $cvPath, $u['student_id']]);
+        q('UPDATE students SET gpa = ? WHERE student_id = ?', [$gpa === '' ? null : $gpa, $u['student_id']]);
+        if ($staged) {
+            // saved under a random name in private storage; the original name is kept for display
+            $dir = ECOOP_ROOT . '/storage/cv/';
+            if (!is_dir($dir)) mkdir($dir, 0775, true);
+            $path = 'cv/u_s' . $u['student_id'] . '_' . bin2hex(random_bytes(8)) . '.' . $staged['ext'];
+            if (!rename($staged['path'], ECOOP_ROOT . '/storage/' . $path)) fail('Could not save the CV.', 'server', 500);
+            $old = val('SELECT cv_file_path FROM students WHERE student_id = ?', [$u['student_id']]);
+            q('UPDATE students SET cv_file_path = ?, cv_file_name = ?, cv_uploaded_at = NOW() WHERE student_id = ?', [$path, mb_substr($staged['name'], 0, 255), $u['student_id']]);
+            if ($old && str_starts_with($old, 'cv/u_')) @unlink(ECOOP_ROOT . '/storage/' . $old);
+            audit((int)$u['user_id'], 'Uploaded CV ' . $staged['name'], 'STUDENT', (int)$u['student_id']);
+        }
         audit((int)$u['user_id'], 'Updated student profile', 'STUDENT', (int)$u['student_id']);
     });
 }

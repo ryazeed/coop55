@@ -174,10 +174,10 @@ function renderApplicants() {
     var st = find(S.students, a.student), u = find(S.users, st.user), o = find(S.opps, a.opp), full = seatsTaken(o.id) >= o.capacity;
     var sub = esc(st.major) + ' · ' + t('profile.gpa') + ' ' + esc(st.gpa || '—') + (o.minGpa ? ' (' + t('minGpa') + ' ' + o.minGpa + ')' : '') + ' · ' + esc(o.title) + ' · ' + fmtDate(a.date) +
       '</span><span class="co-row__sub" dir="ltr">' + esc(u.email) + (st.phone ? ' · ' + esc(st.phone) : '');
-    var right = a.status !== 'Submitted' ? badge(a.status)
+    var right = cvButton(st) + (a.status !== 'Submitted' ? badge(a.status)
       : '<button class="co-btn co-btn--soft co-btn--sm" type="button" onclick="openStudent(\'' + st.id + '\')">' + t('viewDetails') + '</button>' +
         '<button class="co-btn co-btn--danger-ghost co-btn--sm" type="button" onclick="rejectApp(\'' + a.id + '\')">' + t('common.reject') + '</button>' +
-        '<button class="co-btn co-btn--primary co-btn--sm" type="button" onclick="acceptApp(\'' + a.id + '\')"' + (full ? ' disabled' : '') + '>' + t('common.accept') + '</button>';
+        '<button class="co-btn co-btn--primary co-btn--sm" type="button" onclick="acceptApp(\'' + a.id + '\')"' + (full ? ' disabled' : '') + '>' + t('common.accept') + '</button>');
     return row(userMedia(st.user), esc(u.name), sub, right, ' data-app="' + a.id + '"');
   }).join('') + '</div></div>');
 }

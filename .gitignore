@@ -7,6 +7,8 @@ storage/avatars/*
 storage/reports/*
 !storage/reports/demo_r1.pdf
 !storage/reports/demo_r2.docx
+# CVs uploaded while testing (the demo CVs are kept)
+storage/cv/u_*
 node_modules/
 .DS_Store
 Thumbs.db

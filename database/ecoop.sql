@@ -111,6 +111,7 @@ CREATE TABLE students (
   major_id               SMALLINT UNSIGNED NOT NULL,
   gpa                    DECIMAL(3,2)      NULL,
   cv_file_path           VARCHAR(255)      NULL,
+  cv_file_name           VARCHAR(255)      NULL,                     -- the name the student uploaded (the file is saved under a random name)
   cv_uploaded_at         DATETIME          NULL,
   placement_id           INT UNSIGNED      NULL,                      -- current placement, NULL = not placed (BR-11)
   supervisor_id          INT UNSIGNED      NULL,                      -- exactly one supervisor once assigned (BR-12)

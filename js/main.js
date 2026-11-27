@@ -319,7 +319,8 @@ function openStudent(sid) {
   var recent = S.attendance.filter(function (a) { return a.student === sid; }).slice(-5).reverse();
   var html = '<div class="app-ringrow">' + ring(rate || 0, t('attendanceRate')) + '<div class="co-list">' +
     row(userMedia(x.user), esc(name), esc(x.major) + ' · ' + t('profile.gpa') + ' ' + esc(x.gpa || '—')) +
-    row('<span class="co-tile">' + icon('mail') + '</span>', '<span dir="ltr">' + esc(u.email) + '</span>', '<span dir="ltr">' + esc(x.phone || '') + '</span>') + '</div></div>';
+    row('<span class="co-tile">' + icon('mail') + '</span>', '<span dir="ltr">' + esc(u.email) + '</span>', '<span dir="ltr">' + esc(x.phone || '') + '</span>') +
+    row('<span class="co-tile co-tile--lavender">' + icon('doc') + '</span>', t('profile.cv'), x.cv ? '<bdi>' + esc(x.cv) + '</bdi>' : t('noCv'), x.cv ? cvButton(x) : '') + '</div></div>';
   html += '<div class="co-list mt-3">';
   if (o) html += row('<span class="co-tile co-tile--mint">' + icon('brief') + '</span>', esc(o.title), esc(companyName(o.company)), badge('Active')) +
     row('<span class="co-tile">' + icon('users') + '</span>', esc(supervisorName(x.supervisor) || t('unassigned')), t('role.Supervisor')) +
@@ -387,6 +388,12 @@ function studentRows(list, badgeFor) {
 
 /* final report file: opens through api/file.php (permission is checked by PHP) */
 function reportLink(rep) { return ROOT + 'api/file.php?key=' + encodeURIComponent(rep.fileKey); }
+/* a student's CV (PHP checks who may open it) */
+function cvLink(st) { return ROOT + 'api/file.php?cv=' + encodeURIComponent(st.id.replace(/^s/, '')); }
+function cvButton(st) {
+  return st.cv ? '<a class="co-btn co-btn--soft co-btn--sm" href="' + cvLink(st) + '" target="_blank" rel="noopener" data-cv="' + st.id + '">' + icon('doc', true) + t('viewCv') + '</a>'
+    : '<span class="co-caption">' + t('noCv') + '</span>';
+}
 
 /* evaluation form (company: Company evaluation, supervisor: Academic evaluation) */
 function setupEvalForm(students, evalType, render) {

@@ -14,6 +14,7 @@ function myApplication(oppId) {
 /* why the student cannot apply to this opportunity ('' = can apply). PHP and the database check the same rules again. */
 function applyBlock(o, st) {
   if (st.placement) return t('apply.placed');
+  if (!st.cv) return t('cvRequired');
   if (seatsTaken(o.id) >= o.capacity) return t('err.capacity_full');
   if (o.minGpa && st.gpa === '') return t('gpaMissing');
   if (o.minGpa && +st.gpa < +o.minGpa) return t('gpaLow') + ' (' + t('yourGpa') + ' ' + st.gpa + ')';
@@ -28,7 +29,7 @@ function renderDashboard() {
   var rep = reportOf(st.id), counts = attCounts(st.id);
   setText('greet', greeting());
   setText('me-short', shortName(ME.name));
-  show('profile-alert', !st.phone || st.gpa === '');
+  show('profile-alert', !st.phone || st.gpa === '' || !st.cv);
   show('revision-alert', !!rep && rep.status === 'Request Revision');
 
   // this week: the last five working days (Sunday to Thursday)
@@ -156,6 +157,7 @@ var filtersReady = false;
 function renderOpportunities() {
   var st = myStudent(), visible = visibleOpps();
   show('placed-alert', !!st.placement);
+  show('cv-alert', !st.placement && !st.cv);
 
   if (!filtersReady) {          // fill the drop-downs once
     var majors = [], cities = [];
@@ -217,11 +219,11 @@ function renderOpportunity() {
     setHTML('od-action', '<div class="co-alert' + (mine.status === 'Accepted' ? ' co-alert--mint' : mine.status === 'Rejected' ? ' co-alert--red' : '') + '">' + icon('ok') + '<div><strong>' + esc(statusText(mine.status)) + '</strong>' +
       '<span>' + t('opp.applied_on', { date: fmtDate(mine.date) }) + '</span></div></div><a class="co-btn co-btn--soft co-btn--sm" href="applications.html">' + t('nav.applications') + '</a>');
   } else if (block) {
-    setHTML('od-action', '<div class="co-alert co-alert--amber" id="apply-block">' + icon('info') + '<div>' + esc(block) + '</div></div>' +
+    setHTML('od-action', '<div class="co-alert co-alert--amber" id="apply-block">' + icon('info') + '<div>' + esc(block) + (block === t('cvRequired') ? ' <a href="settings.html">' + t('cvUploadNow') + '</a>' : '') + '</div></div>' +
       '<button class="co-btn co-btn--primary w-100 justify-content-center" type="button" disabled>' + t('apply.button') + '</button>');
   } else {
     setHTML('od-action', '<button class="co-btn co-btn--primary w-100 justify-content-center" type="button" id="apply-btn" onclick="applyTo(\'' + o.id + '\')">' + icon('send', true) + t('apply.button') + '</button>' +
-      '<p class="co-caption">' + t('apply.note') + '</p>');
+      '<p class="co-caption">' + t('apply.note') + ' ' + t('cvAttached', { f: '<bdi>' + esc(st.cv) + '</bdi>' }) + '</p>');
   }
 }
 

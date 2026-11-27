@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="../assets/css/dashboard.css?v=9e5bf30f">
 <link rel="stylesheet" id="rtl-css" href="../assets/css/rtl.css?v=bcf359de">
 <link rel="stylesheet" href="../assets/css/app.css?v=8548c1a9">
-<script src="../js/lang.js?v=8138a37d"></script>
+<script src="../js/lang.js?v=61f6bdc8"></script>
 </head>
 <body class="app-body">
 <a class="skip-link" href="#main" data-t="a11y.skip">Skip to content</a>
@@ -73,6 +73,7 @@
   </div>
 </div>
 <div class="co-alert co-alert--amber mb-3" id="placed-alert" role="status" hidden><svg class="co-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h0"/></svg><div data-t="apply.placed">You already have a placement.</div></div>
+<div class="co-alert co-alert--amber mb-3" id="cv-alert" role="status" hidden><svg class="co-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h0"/></svg><div><strong data-t="cvAlertTitle">Upload your CV first.</strong> <span data-t="cvRequired">You must upload your CV (PDF or DOCX) before you can apply to an opportunity.</span> <a href="settings.html" data-t="cvUploadNow">Upload CV</a></div></div>
 <!-- search and filters -->
 <form class="app-filters" role="search" onsubmit="return false">
   <label class="co-search app-filters__q"><svg class="co-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" id="f-q" placeholder="Search opportunities, companies, cities…" data-t-ph="search.Student" aria-label="Search"></label>
@@ -108,8 +109,8 @@
 </div>
 <script src="../assets/vendor/bootstrap/bootstrap.bundle.min.js?v=90c4b26d"></script>
 <script src="../js/icons.js?v=14837cba"></script>
-<script src="../js/main.js?v=c801b15a"></script>
-<script src="../js/student.js?v=01655b63"></script>
+<script src="../js/main.js?v=ec02a8a7"></script>
+<script src="../js/student.js?v=0e70731b"></script>
 <script>startPage('Student', renderOpportunities);</script>
 </body>
 </html>

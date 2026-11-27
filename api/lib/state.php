@@ -38,7 +38,7 @@ function build_state(PDO $db, ?array $me): array {
     foreach (all('SELECT s.*, m.major_name, u.phone FROM students s JOIN majors m ON m.major_id = s.major_id JOIN users u ON u.user_id = s.user_id ORDER BY s.student_id') as $r) {
         $s['students'][] = ['id' => 's' . $r['student_id'], 'user' => 'u' . $r['user_id'], 'major' => $r['major_name'],
             'gpa' => $r['gpa'] === null ? '' : number_format((float)$r['gpa'], 2, '.', ''), 'phone' => $r['phone'] ?? '',
-            'cv' => $r['cv_file_path'] ? basename($r['cv_file_path']) : '', 'universityId' => $r['university_id'],
+            'cv' => $r['cv_file_path'] ? ($r['cv_file_name'] ?: basename($r['cv_file_path'])) : '', 'cvDate' => $r['cv_uploaded_at'] ? substr($r['cv_uploaded_at'], 0, 10) : '', 'universityId' => $r['university_id'],
             'supervisor' => pre('sup', $r['supervisor_id']), 'placement' => pre('p', $r['placement_id'])];
     }
 
