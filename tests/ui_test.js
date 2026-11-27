@@ -175,6 +175,17 @@ function ok(name, cond, info) {
   await p.fill('#ev-comments', 'Reliable, learns fast and works well with the warehouse team.'); await p.locator('#ev-score').fill('91');
   await p.click('#eval-form button[type=submit]'); await p.waitForTimeout(900);
   ok('company submits an evaluation', /91 \/ 100/.test(await text(p, '#eval-list')), evalName + ' ' + await toast(p));
+  await go(p, '/company/report.html');
+  await p.waitForSelector('#report-body tr');
+  const rep1 = await text(p, '#report-body');
+  ok('trainee report lists the trainees with their supervisor', await p.locator('#report-body tr').count() === 4 && /Abdullah Rashed Alrumi/.test(rep1) && /abdullah\.alrumi@jic\.edu\.sa/.test(rep1), rep1.slice(0, 200));
+  ok('trainee report shows the numbers', (await text(p, '#report-stats')).includes('4') && /Trainee report · Eastern Logistics/.test(await p.locator('#report-title').innerText()));
+  await shot(p, '07b_trainee_report');
+  const [csv0] = await Promise.all([p.waitForEvent('download'), p.click('#csv-btn')]);
+  const csvText = fs.readFileSync(await csv0.path(), 'utf8');
+  ok('trainee report downloads as CSV with the supervisor contact', /Trainee_Report/.test(csv0.suggestedFilename()) && /abdullah\.alrumi@jic\.edu\.sa/.test(csvText) && /Academic supervisor/.test(csvText));
+  await p.selectOption('#cr-opp', { label: 'Supply Chain Analyst Trainee' }); await p.waitForTimeout(800);
+  ok('trainee report filters by opportunity', await p.locator('#report-body tr').count() === 3 && !/Yazeed/.test(await text(p, '#report-body')));
   await go(p, '/company/profile.html');
   await p.fill('#c-phone', '0138881234'); await p.click('#company-form button[type=submit]'); await p.waitForTimeout(900);
   ok('company saves its profile', (await toast(p)).length > 3 && /Approved/.test(await text(p, '#cp-status')));

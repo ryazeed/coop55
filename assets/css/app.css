@@ -77,3 +77,7 @@ button.co-row { font: inherit; color: inherit; text-align: start; width: 100%; c
 .app-chat__new .co-input { flex: 1; min-width: 0; }
 .app-chatrow .co-row__text, .app-chat__thread .co-row__text { min-width: 0; }
 .app-chat__thread { grid-template-columns: minmax(0, 1fr); }
+
+/* trainee report: keep names and periods readable in the wide table */
+#report-body td:first-child, #report-body td:nth-child(2) { min-width: 170px; }
+#report-body td:last-child { min-width: 220px; }

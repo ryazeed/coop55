@@ -11,17 +11,17 @@ function dash(v) { return v == null || v === '' ? '—' : v; }
 function showReport(r) {
   var empty = !r.rows.length;
   setText('report-title', 'E-COOP · ' + r.title);
-  setText('report-meta', t('generatedOn') + ': ' + fmtDate(TODAY) + ' ' + t('generatedBy') + ' ' + ME.name + ' · ' + r.filters);
+  setText('report-meta', t('generatedOn') + ': ' + fmtDate(TODAY) + ' ' + t('generatedBy') + ' ' + ME.name + ' · ' + r.filters + (r.note ? ' · ' + r.note : ''));
   setHTML('report-stats', (r.stats || []).map(function (s) {
-    return '<section class="co-card"><span class="co-caption">' + esc(s[0]) + '</span><div class="co-metric">' + esc(s[1]) + '</div></section>';
+    return '<section class="co-card"><span class="co-caption">' + esc(s[0]) + '</span><div class="co-metric"><bdi dir="ltr">' + esc(s[1]) + '</bdi></div></section>';   // "0 / 3" keeps its order in Arabic
   }).join(''));
   setHTML('report-head', '<tr>' + r.cols.map(function (c) { return '<th' + (c[2] ? ' class="num"' : '') + '>' + esc(t(c[1])) + '</th>'; }).join('') + '</tr>');
   var rows = r.rows.concat(r.totalRow ? [r.totalRow] : []);
   setHTML('report-body', empty ? '<tr><td colspan="' + r.cols.length + '" class="co-caption">' + t('noReportData') + '</td></tr>' : rows.map(function (row, i) {
     var isTotal = r.totalRow && i === rows.length - 1;
     return '<tr' + (isTotal ? ' class="app-total"' : '') + '>' + r.cols.map(function (c) {
-      var v = row[c[0]];
-      return '<td' + (c[2] ? ' class="num"' : '') + '>' + (c[3] && v !== '—' && !isTotal ? badge(v) : esc(v)) + '</td>';
+      var v = row[c[0]], html = row[c[0] + 'Html'];
+      return '<td' + (c[2] ? ' class="num"' : '') + '>' + (html != null ? html : c[3] && v !== '—' && !isTotal ? badge(v) : esc(v)) + '</td>';
     }).join('') + '</tr>';
   }).join(''));
   document.getElementById('print-btn').disabled = empty;

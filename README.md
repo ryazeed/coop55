@@ -54,7 +54,8 @@ A complete web system for managing cooperative training (COOP): students apply t
 3. **المشرف** ← **Attendance** ← **Approve**، أو **Reject** مع كتابة السبب.
 4. **الطالب** (yazeed) ← **Opportunities** ← افتح "Procurement Analyst Trainee": الحد الأدنى للمعدل 3.75 ومعدله 3.52، فالتقديم مقفل.
 5. **الأدمن** ← **Audit log**: كل اللي صار مسجّل باسم صاحبه ووقته.
-6. **Messages**: أي دور يراسل الثاني، والرسالة تظهر عند الطرف الثاني خلال 5 ثواني.
+6. **الشركة** ← **Trainee report**: المتدربين وحضورهم وتقريرهم النهائي وتقييماتهم ومشرفهم الأكاديمي وطريقة التواصل معه، مع طباعة و CSV.
+7. **Messages**: أي دور يراسل الثاني، والرسالة تظهر عند الطرف الثاني خلال 5 ثواني.
 
 لو تبي ترجع الديمو من البداية: افتح `install.php` مرة ثانية.
 
@@ -77,7 +78,7 @@ coop55/
 ├── login.html              log in + demo accounts
 ├── register.html           create an account (student, academic supervisor, company)
 ├── student/                dashboard, opportunities, opportunity, applications, attendance, report, evaluations
-├── company/                dashboard, opportunities, applicants, daily-code, trainees, profile
+├── company/                dashboard, opportunities, applicants, daily-code, trainees, report (trainee report), profile
 ├── supervisor/             dashboard, students, attendance, reports, evaluations, export
 ├── admin/                  dashboard, users, companies, opportunities, placements, assign, analytics, report, audit-logs, contact-messages
 │                           (every role also has messages.html, notifications.html, settings.html)
@@ -99,6 +100,7 @@ coop55/
 │   ├── state.php           GET  – the signed-in user + the data for the pages
 │   ├── auth.php            POST – login / logout / register
 │   ├── action.php          POST – every change (apply, accept, check-in, approve …)
+│   ├── report.php          GET  – company trainee report (only that company's trainees)
 │   ├── upload.php          POST – final report upload (PDF/DOCX, 10 MB)
 │   ├── file.php            GET  – open a report / profile photo (with permission check)
 │   └── lib/                bootstrap.php (PDO, sessions, errors), state.php, actions.php
@@ -107,7 +109,7 @@ coop55/
 ├── database/ecoop.sql      schema + rules + demo data (one file)
 ├── storage/                uploaded files (not public)
 ├── docs/ERD.png, ERD.pdf   the numbered ERD
-└── tests/                  api_test.py (122 API checks), ui_test.js (82 browser checks)
+└── tests/                  api_test.py (135 API checks), ui_test.js (86 browser checks)
 ```
 
 ### How a request works
@@ -137,13 +139,14 @@ coop55/
 | BR-18 one final report per student | `act_submitReport` | `UNIQUE (student_id)` |
 | BR-19 one company + one academic evaluation | `act_submitEval` | `UNIQUE (student_id, placement_id, evaluator_type)` |
 | UC-16 academic evaluation after completion + approved report | `act_completePlacement` (admin) | trigger `trg_eval_academic_precondition` |
+| Company trainee report: own trainees only, supervisor comments hidden | `api/report.php` (company_id in the SQL) | – |
 | Chat: only members read and send | `build_state`, `my_conversation()` | FK `messages (conversation_id, sender_id)` → `conversation_members` |
 | BR-04 audit log cannot be edited | `audit()` on every action | triggers `trg_audit_no_update`, `trg_audit_no_delete` |
 
 ### Tests
 With the server running on port 8000:
 ```
-python tests/api_test.py http://localhost:8000     # 122 checks: every action, permissions and database rules
-node tests/ui_test.js http://localhost:8000         # 82 checks in a real browser: every role's buttons and forms (needs: npm i playwright)
+python tests/api_test.py http://localhost:8000     # 135 checks: every action, permissions and database rules
+node tests/ui_test.js http://localhost:8000         # 86 checks in a real browser: every role's buttons and forms (needs: npm i playwright)
 ```
 The tests reset the demo database first.

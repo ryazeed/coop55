@@ -1966,7 +1966,12 @@ Object.assign(I18N.en, {
   'dash.complete_profile_d': 'Add your phone and GPA before you apply.', 'settings.sub': 'Profile, notifications, language and theme.',
   reply: 'Reply', reportDue: 'Report due', eLocked: 'Too many wrong passwords. The account is locked for 15 minutes.',
   nPlacementDone: 'Your training at “{o}” was marked completed.', 'admin.complete_confirm': 'Mark this placement completed? The academic evaluation opens after this.',
-  'opp.close_confirm': 'Close this opportunity? Students who are still waiting will be told it closed.'
+  'opp.close_confirm': 'Close this opportunity? Students who are still waiting will be told it closed.',
+  /* company trainee report */
+  'nav.trainee_report': 'Trainee report', 'company.report_sub': 'Your trainees, their attendance, final report, evaluations and academic supervisor.',
+  'company.report_title': 'Trainee report', colOpportunity: 'Opportunity and period', colSupervisorContact: 'Academic supervisor',
+  stTrainees: 'Trainees', stAvgAcademic: 'Average academic score', stOpenOpps: 'Open opportunities',
+  attReviewNote: 'Approved, pending and rejected are the supervisor’s review of the check-ins.'
 });
 Object.assign(I18N.ar, {
   account: 'الحساب', collegeEmailHelp: 'الطلاب والمشرفون يستخدمون بريد ‎@jic.edu.sa.',
@@ -1986,7 +1991,12 @@ Object.assign(I18N.ar, {
   'dash.complete_profile_d': 'أضف رقم جوالك ومعدلك قبل التقديم.', 'settings.sub': 'الملف الشخصي والإشعارات واللغة والمظهر.',
   reply: 'رد', reportDue: 'موعد تسليم التقرير', eLocked: 'محاولات كثيرة بكلمة مرور خاطئة. تم قفل الحساب 15 دقيقة.',
   nPlacementDone: 'تم اعتماد اكتمال تدريبك في «{o}».', 'admin.complete_confirm': 'هل تريد اعتماد اكتمال هذا التدريب؟ بعدها يُفتح التقييم الأكاديمي.',
-  'opp.close_confirm': 'هل تريد إغلاق هذه الفرصة؟ سيُبلَّغ الطلاب المنتظرون بإغلاقها.'
+  'opp.close_confirm': 'هل تريد إغلاق هذه الفرصة؟ سيُبلَّغ الطلاب المنتظرون بإغلاقها.',
+  /* تقرير متدربي الشركة */
+  'nav.trainee_report': 'تقرير المتدربين', 'company.report_sub': 'متدربوك وحضورهم وتقريرهم النهائي وتقييماتهم ومشرفهم الأكاديمي.',
+  'company.report_title': 'تقرير المتدربين', colOpportunity: 'الفرصة والفترة', colSupervisorContact: 'المشرف الأكاديمي',
+  stTrainees: 'المتدربون', stAvgAcademic: 'متوسط التقييم الأكاديمي', stOpenOpps: 'الفرص المفتوحة',
+  attReviewNote: 'المعتمد وقيد الانتظار والمرفوض هي مراجعة المشرف لتسجيلات الحضور.'
 });
 
 /* ---------- start: theme (dark by default) and right-to-left Bootstrap for Arabic, before the page is drawn ---------- */

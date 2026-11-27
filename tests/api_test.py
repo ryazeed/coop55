@@ -222,6 +222,32 @@ check('contact inbox: other roles get nothing', east.state()['state']['contacts'
 rej = [x for x in admin.state()['state']['apps'] if x.get('reason')]
 check('rejection reason: hidden from other users', rej and not [x for x in g.state()['state']['apps'] if x.get('reason')], len(rej))
 
+# ---------------------------------------------------------------- company trainee report (api/report.php)
+def report(sess, q=''):
+    r = sess.s.get(BASE + '/api/report.php' + q); return r.status_code, r.json()
+code_, rp = report(U('coop@easternlogistics.sa'))
+names = sorted(x['student'] for x in rp['rows'])
+full = admin.state()['state']                                            # the truth: students placed in Eastern Logistics' opportunities
+east_opps = {o['id'] for o in full['opps'] if o['company'] == 'c2'}
+east_pls = {p['id'] for p in full['placements'] if p['opp'] in east_opps}
+expect = sorted([u['name'] for x in full['students'] if x['placement'] in east_pls for u in full['users'] if u['id'] == x['user']])
+check('trainee report: company sees exactly its own trainees', code_ == 200 and rp['ok'] and names == expect and len(names) >= 3, (names, expect))
+row = [x for x in rp['rows'] if x['student'] == 'Ahmed Abdulmohsen Almousa'][0]
+check('trainee report: supervisor name, department, e-mail and phone', row['supervisor'] == 'Abdullah Rashed Alrumi' and row['supEmail'] == 'abdullah.alrumi@jic.edu.sa' and row['supDept'] and row['supPhone'], row)
+check('trainee report: attendance counts from the supervisor review', row['approved'] + row['pending'] == row['days'] and isinstance(row['rejected'], int) and 0 <= row['rate'] <= 100)
+check('trainee report: final report status without the supervisor comments', 'report' in row and not any('comment' in k.lower() for k in row))
+check('trainee report: both evaluation scores', 'companyScore' in row and 'academicScore' in row)
+check('trainee report: stats match the rows', rp['stats']['trainees'] == len(rp['rows']) and rp['stats']['reportsApproved'] == len([x for x in rp['rows'] if x['report'] == 'Approved']))
+_, gp = report(U('training@gulfpetrochem.sa'))
+check('trainee report: another company gets other trainees', gp['rows'] and not set(x['student'] for x in gp['rows']) & set(names))
+_, gp2 = report(U('training@gulfpetrochem.sa'), '?opp=o2')
+check('trainee report: asking for another company\'s opportunity returns nothing', gp2['ok'] and gp2['rows'] == [])
+_, f = report(U('coop@easternlogistics.sa'), '?opp=o99999')
+check('trainee report: unknown opportunity returns nothing', f['ok'] and f['rows'] == [])
+for who, mail, want in (('student', 'ahmed.almousa@jic.edu.sa', 403), ('supervisor', 'abdullah.alrumi@jic.edu.sa', 403), ('admin', 'coop.office@jic.edu.sa', 403)):
+    c, j = report(U(mail)); check('trainee report: %s cannot open it' % who, c == want and j['code'] == 'forbidden', c)
+c, j = report(U()); check('trainee report: sign-in required', c == 401 and j['code'] == 'auth')
+
 check('logout ends the session', ahmed.post('auth.php', op='logout')['me'] is None and ahmed.act(type='readNotifs')['code'] == 'auth')
 
 n = sum(1 for r in results if r[1]); print(f'\n{n} / {len(results)} passed')

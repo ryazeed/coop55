@@ -233,3 +233,48 @@ function renderCompanyProfile() {
     act({ type: 'companyProfile', name: name, city: document.getElementById('c-city').value, phone: phone }, t('cpSaved'), renderCompanyProfile);
   };
 }
+
+/* ---------- Trainee report: attendance, final report, evaluations and academic supervisor ---------- */
+/* PHP (api/report.php) reads only this company's trainees; the page draws the table and exports it */
+var companyReportReady = false;
+
+function renderCompanyReport() {
+  if (!companyReportReady) {
+    var opps = myCompanyData().opps.filter(function (o) { return S.placements.some(function (p) { return p.opp === o.id; }); });
+    setHTML('cr-opp', '<option value="">' + t('company.all_opps') + '</option>' + opps.map(function (o) { return '<option value="' + o.id + '">' + esc(o.title) + '</option>'; }).join(''));
+    document.getElementById('cr-opp').onchange = renderCompanyReport;
+    companyReportReady = true;
+  }
+  var select = document.getElementById('cr-opp');
+  api('report.php' + (select.value ? '?opp=' + encodeURIComponent(select.value) : '')).then(function (res) {
+    if (!res.ok) { toast(res.error, true); return; }
+    var rows = res.rows.map(function (x) {
+      var sup = x.supervisor ? [x.supervisor, x.supDept, x.supEmail, x.supPhone].filter(Boolean).join(' · ') : t('dash.no_supervisor');
+      return {
+        student: x.student + ' (' + x.universityId + ') · ' + x.major,
+        studentHtml: '<strong>' + esc(x.student) + '</strong><br><span class="co-caption">' + esc(x.universityId) + ' · ' + esc(x.major) + '</span>',
+        opportunity: x.opportunity + ' · ' + x.start + ' – ' + x.end + ' · ' + statusText(x.placementStatus),
+        opportunityHtml: esc(x.opportunity) + '<br><span class="co-caption">' + fmtDate(x.start) + ' – ' + fmtDate(x.end) + '</span> ' + badge(x.placementStatus),
+        days: x.days, approved: x.approved, pending: x.pending, rejected: x.rejected, rate: x.rate == null ? '—' : x.rate + '%',
+        report: x.report, cScore: dash(x.companyScore), aScore: dash(x.academicScore),
+        supervisor: sup,
+        supervisorHtml: x.supervisor
+          ? '<strong>' + esc(x.supervisor) + '</strong>' + (x.supDept ? '<br><span class="co-caption">' + esc(x.supDept) + '</span>' : '') +
+            '<br><a href="mailto:' + esc(x.supEmail) + '" dir="ltr">' + esc(x.supEmail) + '</a>' + (x.supPhone ? '<br><span dir="ltr">' + esc(x.supPhone) + '</span>' : '')
+          : '<span class="co-badge co-badge--amber">' + t('dash.no_supervisor') + '</span>'
+      };
+    });
+    var st = res.stats;
+    showReport({
+      title: t('company.report_title') + ' · ' + res.company, file: 'E-COOP_Trainee_Report_' + TODAY, logName: 'company trainee',
+      filters: select.value ? select.selectedOptions[0].textContent : t('company.all_opps'), note: t('attReviewNote'),
+      cols: [['student', 'colStudent'], ['opportunity', 'colOpportunity'], ['days', 'colDays', 1], ['approved', 'colApproved', 1], ['pending', 'colPending', 1],
+        ['rejected', 'colRejected', 1], ['rate', 'colAttRate', 1], ['report', 'colReport', 0, 1], ['cScore', 'colCompanyScore', 1], ['aScore', 'colAcademicScore', 1],
+        ['supervisor', 'colSupervisorContact']],
+      rows: rows,
+      stats: [[t('stTrainees'), st.trainees], [t('stOpenOpps'), st.openOpps], [t('stAvgAtt'), st.avgRate == null ? '—' : st.avgRate + '%'],
+        [t('stReportsApproved'), st.reportsApproved + ' / ' + st.trainees], [t('stAvgCompany'), st.avgCompany == null ? '—' : st.avgCompany + '/100'],
+        [t('stAvgAcademic'), st.avgAcademic == null ? '—' : st.avgAcademic + '/100']]
+    });
+  });
+}
