@@ -36,7 +36,7 @@ function renderSettings() {
   document.getElementById('photo-remove').onclick = function () { act({ type: 'avatar', photo: null }, t('photoRemoved'), renderSettings); };
 
   document.getElementById('p-name').value = ME.name;
-  document.getElementById('p-email').value = ME.email;
+  setupEmail();
   if (ME.role === 'Student') setupStudentProfile();
   else {
     document.getElementById('p-role').value = t('role.' + ME.role) + (ME.dept ? ' · ' + ME.dept : '');
@@ -79,6 +79,44 @@ function setupStudentProfile() {
     setText('p-gpa-err', isNaN(g) || g < 0 || g > 4 ? t('gpaError') : ''); if (isNaN(g) || g < 0 || g > 4) ok = false;
     if (cvFile && !/\.(pdf|docx)$/i.test(cvFile.name)) { toast(t('fileTypeError'), true); ok = false; }
     if (!ok) return;
-    act({ type: 'profile', fields: { phone: phone, gpa: gpa, cv: cvFile ? cvFile.name : myStudent().cv }, userFields: { name: name } }, t('profile.saved'), renderSettings);
+    var major = document.getElementById('p-major').value;
+    act({ type: 'profile', fields: { phone: phone, gpa: gpa, major: major, cv: cvFile ? cvFile.name : myStudent().cv }, userFields: { name: name } }, t('profile.saved'), renderSettings);
+  };
+}
+
+/* sign-in e-mail (every role): PHP checks the current password, the domain and that no other account uses it */
+function setupEmail() {
+  var input = document.getElementById('p-email'), pass = document.getElementById('p-email-pass');
+  var company = ME.role === 'Company';
+  input.value = ME.email;
+  input.placeholder = company ? 'name@company.sa' : 'name@gmail.com';
+  setText('p-email-help', company ? t('workEmailHelp') : t('collegeEmailHelp'));
+
+  document.getElementById('email-form').onsubmit = function (e) {
+    e.preventDefault();
+    var email = input.value.trim().toLowerCase();
+    var err = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? t('reEmail')
+      : email === ME.email.toLowerCase() ? t('eSameEmail')
+      : !company && !/@(jic\.edu\.sa|gmail\.com)$/.test(email) ? t('reCollege') : '';
+    setText('p-email-err', err);
+    setText('p-email-pass-err', pass.value ? '' : t('ePass'));
+    if (err || !pass.value) return;
+
+    var btn = document.getElementById('p-email-save'); btn.disabled = true;
+    api('action.php', { type: 'changeEmail', email: email, password: pass.value }).then(function (res) {
+      btn.disabled = false;
+      if (res.state) S = res.state;
+      if (!res.ok) {
+        var messages = { email_taken: ['p-email-err', 'reTaken'], email_domain: ['p-email-err', 'reCollege'], same_email: ['p-email-err', 'eSameEmail'],
+                         wrong_password: ['p-email-pass-err', 'rePassWrong'], validation: ['p-email-err', 'reEmail'] };
+        var m = messages[res.code];
+        if (m) setText(m[0], t(m[1])); else toast(res.error, true);
+        return;
+      }
+      pass.value = '';
+      ME = find(S.users, ME.id) || ME; fillHeader();
+      toast(t('emailSaved'));
+      renderSettings();
+    });
   };
 }

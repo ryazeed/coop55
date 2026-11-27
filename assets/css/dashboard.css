@@ -252,6 +252,8 @@ a.co-iconbtn:hover { color: var(--ink); }
 .app-media-sm { width: 40px; height: 40px; font-size: 13px; }
 .app-tags { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .app-tags .co-badge::before { display: none; }
+/* a long list of majors wraps inside its tag instead of widening the page */
+.app-tags .co-badge { white-space: normal; max-width: 100%; height: auto; min-height: 24px; line-height: 1.4; padding-block: 3px; border-radius: 12px; overflow-wrap: anywhere; }
 .app-tags .co-badge .co-ico--sm { width: 13px; height: 13px; }
 .app-prose { line-height: 1.7; }
 .app-body-text { margin: 0; font-size: 14px; line-height: 21px; }

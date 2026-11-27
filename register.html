@@ -9,11 +9,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" id="bootstrap-css" href="assets/vendor/bootstrap/bootstrap.min.css?v=22fd4eef">
 <link rel="stylesheet" href="assets/css/main.css?v=e2c0e43a">
-<link rel="stylesheet" href="assets/css/dashboard.css?v=4c0cb03b">
+<link rel="stylesheet" href="assets/css/dashboard.css?v=9e5bf30f">
 <link rel="stylesheet" href="assets/css/auth.css?v=b6880876">
 <link rel="stylesheet" id="rtl-css" href="assets/css/rtl.css?v=bcf359de">
 <link rel="stylesheet" href="assets/css/app.css?v=8548c1a9">
-<script src="js/lang.js?v=dd187104"></script>
+<script src="js/lang.js?v=8138a37d"></script>
 </head>
 <body class="site-body">
 <a class="skip-link" href="#main" data-t="a11y.skip">Skip to content</a>
@@ -51,7 +51,7 @@
       </div>
       <div class="row g-3">
         <div class="col-12 co-field"><label for="r-name" id="r-name-label" data-t="auth.full_name">Full name</label><input class="co-input" id="r-name" maxlength="150" autocomplete="name"><span class="app-err" id="r-name-err"></span></div>
-        <div class="col-md-6 co-field"><label for="r-email" id="r-email-label" data-t="auth.inst_email">College email</label><input class="co-input" id="r-email" type="email" dir="ltr" placeholder="name@jic.edu.sa" autocomplete="email"><span class="co-field__help" id="r-email-help" data-t="collegeEmailHelp">Students and supervisors use their @jic.edu.sa address.</span><span class="app-err" id="r-email-err"></span></div>
+        <div class="col-md-6 co-field"><label for="r-email" id="r-email-label" data-t="auth.inst_email">Email</label><input class="co-input" id="r-email" type="email" dir="ltr" placeholder="name@jic.edu.sa" autocomplete="email"><span class="co-field__help" id="r-email-help" data-t="collegeEmailHelp">Students and supervisors use an @gmail.com or @jic.edu.sa address.</span><span class="app-err" id="r-email-err"></span></div>
         <div class="col-md-6 co-field"><label for="r-phone" data-t="auth.phone">Mobile number</label><input class="co-input" id="r-phone" dir="ltr" inputmode="numeric" placeholder="05XXXXXXXX" autocomplete="tel"><span class="app-err" id="r-phone-err"></span></div>
 
         <!-- student only -->
@@ -59,6 +59,7 @@
           <select class="co-input" id="r-major">
             <option>Business Administration</option><option>Chemical Engineering</option><option>Industrial Engineering</option>
             <option>Mechanical Engineering</option><option>Electrical Engineering</option><option>Computer Science</option><option>Chemistry</option>
+            <option>Management Information Systems</option>
           </select></div>
         <div class="col-md-6 co-field" id="student-fields-2"><label for="r-gpa" data-t="rGpa">GPA (out of 4)</label><input class="co-input" id="r-gpa" dir="ltr" inputmode="decimal" placeholder="3.50"><span class="app-err" id="r-gpa-err"></span></div>
 
@@ -93,7 +94,7 @@
 <div class="app-toasts" id="toasts" aria-live="polite"></div>
 <script src="js/icons.js?v=14837cba"></script>
 <script src="js/main.js?v=c801b15a"></script>
-<script src="js/public.js?v=e53d0652"></script>
+<script src="js/public.js?v=5ec8de11"></script>
 <script>startPage(null, renderRegister);</script>
 </body>
 </html>

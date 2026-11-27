@@ -125,7 +125,7 @@ function showKindFields() {
   setText('r-name-label', company ? t('companyNameLabel') : t('auth.full_name'));
   setText('r-email-label', company ? t('auth.work_email') : t('auth.inst_email'));
   setText('r-email-help', company ? t('workEmailHelp') : t('collegeEmailHelp'));
-  document.getElementById('r-email').placeholder = company ? 'name@company.sa' : 'name@jic.edu.sa';
+  document.getElementById('r-email').placeholder = company ? 'name@company.sa' : 'name@gmail.com';
   var note = document.getElementById('kind-note');
   note.hidden = !company;
   note.textContent = company ? t('company.pending_d') : '';
@@ -144,7 +144,7 @@ function register(e) {
   };
   var errors = {
     'r-name-err': v.name.length < 3 ? (k === 'Company' ? t('reCompany') : t('reName')) : '',
-    'r-email-err': !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email) ? t('reEmail') : (k !== 'Company' && !/@jic\.edu\.sa$/.test(v.email) ? t('reCollege') : ''),
+    'r-email-err': !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email) ? t('reEmail') : (k !== 'Company' && !/@(jic\.edu\.sa|gmail\.com)$/.test(v.email) ? t('reCollege') : ''),
     'r-phone-err': !/^05\d{8}$/.test(v.phone) ? t('rePhone') : '',
     'r-gpa-err': k === 'Student' && (isNaN(parseFloat(v.gpa)) || +v.gpa < 0 || +v.gpa > 4) ? t('reGpa') : '',
     'r-pass-err': v.pass.length < 8 || !/[A-Za-z]/.test(v.pass) || !/\d/.test(v.pass) ? t('rePass') : '',

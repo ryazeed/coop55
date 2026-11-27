@@ -436,11 +436,22 @@ BEGIN
   SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'AUDIT_LOG is append-only: deletes are not allowed';
 END$$
 
--- D3 §3.4.3.1: students register with the institutional e-mail domain
+-- D3 §3.4.3.1: students register with an allowed e-mail domain (the college domain or Gmail)
 CREATE TRIGGER trg_student_email_domain BEFORE INSERT ON students FOR EACH ROW
 BEGIN
-  IF (SELECT LOWER(email) FROM users WHERE user_id = NEW.user_id) NOT LIKE '%@jic.edu.sa' THEN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Students must use an @jic.edu.sa e-mail address';
+  DECLARE v_email VARCHAR(190);
+  SELECT LOWER(email) INTO v_email FROM users WHERE user_id = NEW.user_id;
+  IF v_email NOT LIKE '%@jic.edu.sa' AND v_email NOT LIKE '%@gmail.com' THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Students must use an @jic.edu.sa or @gmail.com e-mail address';
+  END IF;
+END$$
+
+-- the same rule when a student changes the e-mail later in Settings
+CREATE TRIGGER trg_student_email_change BEFORE UPDATE ON users FOR EACH ROW
+BEGIN
+  IF NEW.role = 'Student' AND LOWER(NEW.email) <> LOWER(OLD.email)
+     AND LOWER(NEW.email) NOT LIKE '%@jic.edu.sa' AND LOWER(NEW.email) NOT LIKE '%@gmail.com' THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Students must use an @jic.edu.sa or @gmail.com e-mail address';
   END IF;
 END$$
 
@@ -675,7 +686,8 @@ INSERT INTO majors (major_name, major_name_ar, department) VALUES
  ('Mechanical Engineering', 'الهندسة الميكانيكية', 'Mechanical Engineering Technology'),
  ('Electrical Engineering', 'الهندسة الكهربائية', 'Electrical Engineering Technology'),
  ('Computer Science', 'علوم الحاسب', 'Computer Science'),
- ('Chemistry', 'الكيمياء', 'Chemistry');
+ ('Chemistry', 'الكيمياء', 'Chemistry'),
+ ('Management Information Systems', 'نظم المعلومات الإدارية', 'Department of Business Administration');
 
 
 
@@ -730,7 +742,7 @@ INSERT INTO coop_opportunities (opportunity_id, company_id, approved_by_admin_id
  (6, 2, NULL, 'Customs and Trade Compliance Trainee', 'Prepare import documentation, check HS codes and track customs clearance status.', 'Dammam', 1, NULL, 'Pending Approval', DATE_ADD('2026-09-28 09:00', INTERVAL @off DAY), NULL),
  (7, 2, 1, 'Fleet Scheduling Trainee', 'Plan daily delivery routes and monitor driver schedules against service-level targets.', 'Khobar', 2, 2.75, 'Approved', DATE_ADD('2026-09-20 09:00', INTERVAL @off DAY), DATE_ADD('2026-09-20 15:00', INTERVAL @off DAY)),
  (8, 2, 1, 'Procurement Analyst Trainee', 'Compare supplier quotations, prepare purchase orders and report monthly spending to the procurement manager.', 'Dammam', 2, 3.75, 'Approved', DATE_ADD('2026-09-25 09:00', INTERVAL @off DAY), DATE_ADD('2026-09-25 15:00', INTERVAL @off DAY));
-INSERT INTO opportunity_majors (opportunity_id, major_id) VALUES (1, 2), (1, 3), (2, 1), (3, 4), (4, 1), (5, 7), (5, 2), (6, 1), (7, 1), (7, 3), (8, 1);
+INSERT INTO opportunity_majors (opportunity_id, major_id) VALUES (1, 2), (1, 3), (2, 1), (3, 4), (4, 1), (5, 7), (5, 2), (6, 1), (7, 1), (7, 3), (8, 1), (2, 8), (8, 8);
 -- applications go in before placements: the eligibility trigger only lets unplaced students apply
 INSERT INTO applications (application_id, student_id, opportunity_id, status, submitted_at, decided_at, rejection_reason) VALUES
  (1, 1, 2, 'Accepted', DATE_ADD('2026-08-20 10:00', INTERVAL @off DAY), DATE_ADD('2026-08-24 11:00', INTERVAL @off DAY), NULL),

@@ -58,7 +58,11 @@ function register(array $b): void {
     $phone = preg_replace('/\s/', '', (string)($b['phone'] ?? ''));
     if (mb_strlen($name) < 3 || mb_strlen($name) > 150) fail('Enter the full name (3-150 characters).', 'validation');
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) fail('Enter a valid e-mail.', 'validation');
-    if ($kind !== 'Company' && !str_ends_with($email, '@jic.edu.sa')) fail('Students and supervisors must use their @jic.edu.sa college e-mail.', 'email_domain');   // FR-01
+    // FR-01: students and supervisors register with an allowed e-mail domain (college or Gmail)
+    $domains = ['jic.edu.sa', 'gmail.com'];
+    if ($kind !== 'Company' && !in_array(substr(strrchr($email, '@'), 1), $domains, true)) {
+        fail('Students and supervisors must use an @jic.edu.sa or @gmail.com e-mail.', 'email_domain');
+    }
     if (strlen($pass) < 8 || !preg_match('/[A-Za-z]/', $pass) || !preg_match('/\d/', $pass)) fail('The password needs 8+ characters with letters and numbers.', 'validation');
     if ($phone !== '' && !preg_match('/^0\d{8,9}$/', $phone)) fail('Phone must start with 0 and have 9 or 10 digits.', 'validation');
     if (val('SELECT 1 FROM users WHERE LOWER(email) = ?', [$email])) fail('An account with this e-mail already exists.', 'email_taken');

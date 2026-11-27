@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 const ACTIONS = ['apply', 'appDecision', 'postOpp', 'oppDecision', 'companyDecision', 'genCode', 'checkIn', 'attDecision',
     'submitReport', 'reportDecision', 'submitEval', 'userStatus', 'assign', 'profile', 'readNotifs', 'pref', 'contact',
-    'companyProfile', 'logExport', 'avatar', 'newChat', 'sendMsg', 'readChat', 'withdraw', 'closeOpp', 'completePlacement'];
+    'companyProfile', 'logExport', 'avatar', 'newChat', 'sendMsg', 'readChat', 'withdraw', 'closeOpp', 'completePlacement', 'changeEmail'];
 
 function run_action(array $a): void {
     $type = (string)($a['type'] ?? '');
@@ -144,11 +144,39 @@ function act_profile(array $a): void {                                 // studen
     $cv = trim((string)($f['cv'] ?? ''));
     $cvPath = $cv !== '' && preg_match('/\.(pdf|docx)$/i', $cv) ? 'cv/' . basename($cv) : null;
     $name = text_in($uf, 'name', 150);
-    tx(function () use ($u, $phone, $gpa, $cvPath, $name) {
+    // the major is optional in the request: empty keeps the current one
+    $majorName = trim((string)($f['major'] ?? ''));
+    $major = $majorName === '' ? null : val('SELECT major_id FROM majors WHERE major_name = ?', [$majorName]);
+    if ($majorName !== '' && !$major) fail('Choose a major from the list.', 'validation');
+    tx(function () use ($u, $phone, $gpa, $cvPath, $name, $major, $majorName) {
+        $old = val('SELECT major_id FROM students WHERE student_id = ?', [$u['student_id']]);
+        if ($major && (int)$major !== (int)$old) {
+            q('UPDATE students SET major_id = ? WHERE student_id = ?', [$major, $u['student_id']]);
+            audit((int)$u['user_id'], 'Changed major to ' . $majorName, 'STUDENT', (int)$u['student_id']);
+        }
         q('UPDATE users SET full_name = ?, phone = ? WHERE user_id = ?', [$name, $phone ?: null, $u['user_id']]);
         q('UPDATE students SET gpa = ?, cv_file_path = ?, cv_uploaded_at = IF(? IS NULL, NULL, COALESCE(cv_uploaded_at, NOW())) WHERE student_id = ?',
             [$gpa === '' ? null : $gpa, $cvPath, $cvPath, $u['student_id']]);
         audit((int)$u['user_id'], 'Updated student profile', 'STUDENT', (int)$u['student_id']);
+    });
+}
+
+/* every role: change the sign-in e-mail; the current password confirms it is really the owner */
+function act_changeEmail(array $a): void {
+    $u = require_user();
+    $email = strtolower(trim((string)($a['email'] ?? '')));
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($email) > 190) fail('Enter a valid e-mail address.', 'validation');
+    $row = one('SELECT email, password_hash, role FROM users WHERE user_id = ?', [$u['user_id']]);
+    if ($email === strtolower($row['email'])) fail('This is already your e-mail.', 'same_email');
+    // the same domain rule as registration (FR-01): students, supervisors and the office use the college domain or Gmail
+    if ($row['role'] !== 'Company' && !in_array(substr(strrchr($email, '@'), 1), ['jic.edu.sa', 'gmail.com'], true)) {
+        fail('Use an @jic.edu.sa or @gmail.com e-mail.', 'email_domain');
+    }
+    if (!password_verify((string)($a['password'] ?? ''), $row['password_hash'])) fail('The current password is not correct.', 'wrong_password');
+    if (val('SELECT user_id FROM users WHERE email = ? AND user_id <> ?', [$email, $u['user_id']])) fail('This e-mail is already used by another account.', 'email_taken');
+    tx(function () use ($u, $email) {
+        q('UPDATE users SET email = ? WHERE user_id = ?', [$email, $u['user_id']]);
+        audit((int)$u['user_id'], 'Changed sign-in e-mail to ' . $email, 'USER', (int)$u['user_id']);
     });
 }
 

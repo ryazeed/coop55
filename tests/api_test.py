@@ -136,7 +136,8 @@ check('audit log has the admin actions', any('Assigned Dr. Mona' in l['action'] 
 check('audit log readable text for procedures', any(l['action'].startswith('Accepted application from Hind') for l in admin.state()['state']['audit']))
 
 reg = U()
-check('student register needs college e-mail (TC-08)', reg.post('auth.php', op='register', kind='Student', name='Test Student', email='t@gmail.com', password='Passw0rd!', major='Computer Science', gpa='4')['code'] == 'email_domain')
+check('student register refuses other e-mail domains (TC-08)', reg.post('auth.php', op='register', kind='Student', name='Test Student', email='t@hotmail.com', password='Passw0rd!', major='Computer Science', gpa='4')['code'] == 'email_domain')
+check('student can register with a Gmail address', U().post('auth.php', op='register', kind='Student', name='Test Student', email='gmail.student.test@gmail.com', password='Passw0rd!', major='Computer Science', gpa='4')['ok'])  # a new session, so 'reg' stays signed out
 r = reg.post('auth.php', op='register', kind='Student', name='Sara Test', email='sara.test@jic.edu.sa', password='Passw0rd1', phone='0551112223', major='Computer Science', gpa='3.6')
 check('student registers and is signed in', r['ok'] and r['me'] and any(u['email'] == 'sara.test@jic.edu.sa' for u in r['state']['users']), r.get('error'))
 check('new account can sign in with its password', U('sara.test@jic.edu.sa', 'Passw0rd1').last['ok'])
@@ -155,6 +156,24 @@ check('profile photo saved', r['ok'] and av and ahmed.s.get(BASE + '/' + av).sta
 r = ahmed.act(type='profile', fields={'phone': '0551234000', 'gpa': '3.30', 'cv': 'Ahmed_CV.pdf'}, userFields={'name': 'Ahmed Abdulmohsen Almousa'})
 check('student profile saved', [x for x in r['state']['students'] if x['id'] == 's1'][0]['gpa'] == '3.30', r.get('error'))
 check('bad GPA refused (CHECK)', ahmed.act(type='profile', fields={'phone': '', 'gpa': '7', 'cv': ''}, userFields={'name': 'Ahmed'})['code'] == 'validation')
+# ---------------------------------------------------------------- change major (students) and sign-in e-mail (every role)
+r = ahmed.act(type='profile', fields={'phone': '0551234000', 'gpa': '3.30', 'major': 'Management Information Systems', 'cv': 'Ahmed_CV.pdf'}, userFields={'name': 'Ahmed Abdulmohsen Almousa'})
+check('student changes major to MIS', r['ok'] and [x for x in r['state']['students'] if x['id'] == 's1'][0]['major'] == 'Management Information Systems', r.get('error'))
+check('MIS opportunities are seeded', any('Management Information Systems' in o['majors'] for o in r['state']['opps']))
+check('unknown major refused', ahmed.act(type='profile', fields={'phone': '', 'gpa': '3.30', 'major': 'Astrology', 'cv': ''}, userFields={'name': 'Ahmed'})['code'] == 'validation')
+r = ahmed.act(type='profile', fields={'phone': '0551234000', 'gpa': '3.30', 'major': 'Business Administration', 'cv': 'Ahmed_CV.pdf'}, userFields={'name': 'Ahmed Abdulmohsen Almousa'})
+check('major changed back (audited)', [x for x in r['state']['students'] if x['id'] == 's1'][0]['major'] == 'Business Administration'
+      and any(l['action'] == 'Changed major to Management Information Systems' for l in admin.state()['state']['audit']))
+check('e-mail change needs the current password', reg.act(type='changeEmail', email='sara.new@gmail.com', password='wrong')['code'] == 'wrong_password')
+check('student e-mail change keeps the domain rule', reg.act(type='changeEmail', email='sara@hotmail.com', password='Passw0rd1')['code'] == 'email_domain')
+check('e-mail used by another account refused', reg.act(type='changeEmail', email='ahmed.almousa@jic.edu.sa', password='Passw0rd1')['code'] == 'email_taken')
+check('same e-mail refused', reg.act(type='changeEmail', email='SARA.TEST@jic.edu.sa', password='Passw0rd1')['code'] == 'same_email')
+r = reg.act(type='changeEmail', email='Sara.New@gmail.com', password='Passw0rd1')
+check('student changes e-mail', r['ok'] and any(u['email'] == 'sara.new@gmail.com' for u in r['state']['users']), r.get('error'))
+check('signs in with the new e-mail only', U('sara.new@gmail.com', 'Passw0rd1').last['ok'] and U('sara.test@jic.edu.sa', 'Passw0rd1').last['code'] == 'no_user')
+jtf = U('hr@jtf.sa', 'Passw0rd1')
+check('company can use any e-mail domain', jtf.act(type='changeEmail', email='training@jtf.com', password='Passw0rd1')['ok'])
+check('e-mail change without sign-in -> 401', U().act(type='changeEmail', email='x@gmail.com', password='x').get('code') == 'auth')
 r = east.act(type='companyProfile', name='Eastern Logistics Co.', city='Dammam', phone='0138001201'); check('company profile saved (UC-07)', r['ok'], r.get('error'))
 # ---------------------------------------------------------------- minimum GPA of an opportunity
 yz = U('yazeed.alqahtani@jic.edu.sa')                                     # GPA 3.52, not placed

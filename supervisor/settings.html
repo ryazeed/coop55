@@ -9,10 +9,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" id="bootstrap-css" href="../assets/vendor/bootstrap/bootstrap.min.css?v=22fd4eef">
 <link rel="stylesheet" href="../assets/css/main.css?v=e2c0e43a">
-<link rel="stylesheet" href="../assets/css/dashboard.css?v=4c0cb03b">
+<link rel="stylesheet" href="../assets/css/dashboard.css?v=9e5bf30f">
 <link rel="stylesheet" id="rtl-css" href="../assets/css/rtl.css?v=bcf359de">
 <link rel="stylesheet" href="../assets/css/app.css?v=8548c1a9">
-<script src="../js/lang.js?v=dd187104"></script>
+<script src="../js/lang.js?v=8138a37d"></script>
 </head>
 <body class="app-body">
 <a class="skip-link" href="#main" data-t="a11y.skip">Skip to content</a>
@@ -91,9 +91,19 @@
     <form class="co-card app-form set-card" id="profile-form" novalidate>
       <div class="co-card__head"><span class="co-tile"><svg class="co-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span><h2 class="co-card__title set-h" data-t="settings.profile">Profile</h2></div>
       <div class="co-field"><label for="p-name" data-t="auth.full_name">Full name</label><input class="co-input" id="p-name" maxlength="150" disabled><span class="app-err" id="p-name-err"></span></div>
-      <div class="co-field"><label for="p-email" data-t="auth.email">Email</label><input class="co-input" id="p-email" type="email" dir="ltr" disabled></div>
+
         <div class="co-field"><label for="p-role" data-t="admin.role">Role</label><input class="co-input" id="p-role" disabled></div>
         <div class="co-field" id="p-phone-box"><label for="p-phone-ro" data-t="settings.phone">Phone</label><input class="co-input" id="p-phone-ro" dir="ltr" disabled></div>
+    </form>
+
+    <!-- sign-in e-mail -->
+    <form class="co-card app-form set-card" id="email-form" novalidate>
+      <div class="co-card__head"><span class="co-tile co-tile--mint"><svg class="co-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span><h2 class="co-card__title set-h" data-t="emailCard">Sign-in e-mail</h2></div>
+      <div class="co-field"><label for="p-email" data-t="auth.email">Email</label><input class="co-input" id="p-email" type="email" dir="ltr" maxlength="190" autocomplete="email">
+        <span class="co-field__help" id="p-email-help"></span><span class="app-err" id="p-email-err"></span></div>
+      <div class="co-field"><label for="p-email-pass" data-t="currentPass">Current password</label><input class="co-input" id="p-email-pass" type="password" dir="ltr" autocomplete="current-password">
+        <span class="co-field__help" data-t="currentPassHelp">Needed to confirm the change.</span><span class="app-err" id="p-email-pass-err"></span></div>
+      <div class="set-actions"><button class="co-btn co-btn--primary" type="submit" id="p-email-save" data-t="saveEmail">Change e-mail</button></div>
     </form>
   </div>
 
@@ -167,7 +177,7 @@
 <script src="../js/icons.js?v=14837cba"></script>
 <script src="../js/main.js?v=c801b15a"></script>
 <script src="../js/supervisor.js?v=e918b643"></script>
-<script src="../js/settings.js?v=4885ffff"></script>
+<script src="../js/settings.js?v=0e42ec15"></script>
 <script>startPage('Supervisor', renderSettings);</script>
 </body>
 </html>
