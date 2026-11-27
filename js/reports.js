@@ -40,7 +40,7 @@ function showReport(r) {
   var pdf = document.getElementById('pdf-btn');
   pdf.classList.toggle('disabled', empty);
   pdf.setAttribute('aria-disabled', empty ? 'true' : 'false');
-  pdf.onclick = function (e) { if (empty) e.preventDefault(); else toast(t('exportedToast')); };
+  pdf.onclick = function (e) { e.preventDefault(); if (!empty) downloadPDF(pdf); };
   document.getElementById('csv-btn').disabled = empty;
   document.getElementById('csv-btn').onclick = function () {
     downloadCSV(r);
@@ -57,6 +57,37 @@ function cellHTML(v, c, isTotal) {
   return '<strong>' + esc(lines[0]) + '</strong>' + lines.slice(1).map(function (l) {
     return '<br><span class="co-caption"' + (/@|^0\d/.test(l) ? ' dir="ltr"' : '') + '>' + esc(l) + '</span>';
   }).join('');
+}
+
+/* get the PDF from the server; if PHP answers with an error instead of a PDF, show that message */
+function downloadPDF(link) {
+  if (link.dataset.busy) return;
+  link.dataset.busy = '1';
+  link.classList.add('disabled');
+  fetch(link.href, { credentials: 'same-origin' }).then(function (res) {
+    var type = res.headers.get('Content-Type') || '';
+    if (res.ok && type.indexOf('application/pdf') === 0) {
+      var name = (/filename="([^"]+)"/.exec(res.headers.get('Content-Disposition') || '') || [])[1] || 'E-COOP_Report.pdf';
+      return res.blob().then(function (blob) {
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = name;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(a.href); }, 10000);
+        toast(t('exportedToast'));
+      });
+    }
+    return res.text().then(function (text) {
+      var msg;
+      try { msg = JSON.parse(text).error; } catch (err) { msg = text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 300); }
+      toast(t('pdfFailed') + ' (' + res.status + '): ' + (msg || ''), true);
+    });
+  }).catch(function () {
+    toast(t('pdfFailed') + ': ' + t('serverUnreachable'), true);
+  }).then(function () {
+    delete link.dataset.busy;
+    link.classList.remove('disabled');
+  });
 }
 
 /* CSV with a BOM so Excel shows Arabic correctly */

@@ -18,8 +18,15 @@ handle(function () {
 
     if (($_GET['format'] ?? '') !== 'pdf') { json_out(['ok' => true, 'report' => $r]); return; }
 
+    // a PDF needs a little more time and memory than a page; PHP warnings (XAMPP shows them) must not end up inside the file
+    @ini_set('memory_limit', '256M');
+    @set_time_limit(120);
+    ob_start();
     require __DIR__ . '/lib/report_pdf.php';
     $pdf = report_pdf($r);
+    $noise = ob_get_clean();
+    if ($noise !== '' && $noise !== false) error_log('E-COOP PDF: PHP printed text while building the PDF: ' . substr(strip_tags($noise), 0, 500));
+    while (ob_get_level()) ob_end_clean();
     audit((int)$me['user_id'], 'Exported ' . $kind . ' report (PDF) ' . $r['number'], 'REPORT', null);
     header('Content-Type: application/pdf');
     header('Content-Disposition: attachment; filename="' . $r['file'] . '.pdf"');

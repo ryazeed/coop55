@@ -149,7 +149,7 @@ function toast(msg, isError) {
   el.setAttribute('role', isError ? 'alert' : 'status');
   el.textContent = msg;
   box.appendChild(el);
-  setTimeout(function () { el.remove(); }, 4500);
+  setTimeout(function () { el.remove(); }, isError ? 12000 : 4500);     // errors stay longer so they can be read
 }
 
 /* ---------- helpers for the data ---------- */
