@@ -81,3 +81,41 @@ button.co-row { font: inherit; color: inherit; text-align: start; width: 100%; c
 /* trainee report: keep names and periods readable in the wide table */
 #report-body td:first-child, #report-body td:nth-child(2) { min-width: 170px; }
 #report-body td:last-child { min-width: 220px; }
+
+/* Logo: light version in light theme, night version in dark theme (no tile behind it) */
+img[data-logo="dark"] { display: none !important; }
+[data-theme="dark"] img[data-logo="light"] { display: none !important; }
+[data-theme="dark"] img[data-logo="dark"] { display: block !important; }
+.site-logo img[data-logo], .app-brand img[data-logo], .site-footer__brand img[data-logo] { flex: none; }
+[data-theme="dark"] .site-logo img[data-logo="dark"], [data-theme="dark"] .app-brand img[data-logo="dark"], [data-theme="dark"] .site-footer__brand img[data-logo="dark"] { display: inline-block !important; }
+.app-rail a.app-logo:hover { background: none; }
+
+/* Home hero: formal layout, brand mark instead of sample cards */
+.hero { grid-template-columns: 1.25fr 1fr; padding: 80px 0 64px; }
+.hero__eyebrow { display: inline-flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; letter-spacing: .04em; color: var(--ink-muted); }
+.hero__eyebrow::before { content: ""; width: 28px; height: 2px; background: currentColor; opacity: .6; }
+[dir="rtl"] .hero__eyebrow { letter-spacing: 0; }
+.hero__title { font-size: 44px; line-height: 54px; font-weight: 700; letter-spacing: -.02em; max-width: 640px; }
+.hero__lead { max-width: 600px; }
+.hero__stats { width: 100%; max-width: 600px; gap: 0; margin-top: var(--space-4); padding-top: var(--space-5); border-top: 1px solid var(--line, rgba(127,127,127,.25)); }
+.hero__stats > div { flex: 1; padding-inline-end: var(--space-5); }
+.hero__stats > div + div { padding-inline-start: var(--space-5); border-inline-start: 1px solid var(--line, rgba(127,127,127,.25)); }
+.hero__stats dd { font-size: 30px; font-weight: 700; }
+.hero__brand { display: grid; place-items: center; }
+.hero__brand img { width: 100%; max-width: 420px; height: auto; }
+@media (max-width: 991.98px) {
+  .hero { grid-template-columns: 1fr; padding-top: 48px; }
+  .hero__brand { display: none; }
+}
+@media (max-width: 575.98px) {
+  .hero__title { font-size: 32px; line-height: 40px; }
+  .hero__stats > div { padding-inline-end: var(--space-3); }
+  .hero__stats > div + div { padding-inline-start: var(--space-3); }
+  .hero__stats dd { font-size: 24px; }
+}
+/* Keep the three registration buttons on one row on wide screens */
+@media (min-width: 992px) {
+  .hero { grid-template-columns: 1.45fr 1fr; }
+  .hero__actions { flex-wrap: nowrap; }
+  .hero__actions .co-btn { padding: 0 var(--space-4); }
+}
