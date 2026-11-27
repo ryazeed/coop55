@@ -33,14 +33,37 @@ class EcoopPdf extends TCPDF {
         $this->SetFont('dejavusans', '', 9);
         $this->SetTextColor(90, 98, 112);
         $this->Cell(120, 5, bd(rt('pdf.unit', $r['lang']), $ar), 0, 2, $ar ? 'R' : 'L');
+        // the company's logo at the other top corner (right in English, left in Arabic); the report number moves next to it
+        $logo = $this->companyLogo();
+        $gap = 0;
+        if ($logo) {
+            $this->setRTL(false);
+            try {
+                $this->Image($logo, $ar ? $m : $w - $m - 24, 6, 24, 16, '', '', '', false, 300, '', false, false, 0, $ar ? 'LM' : 'RM');
+                $gap = 27;
+            } catch (Throwable $e) { error_log('E-COOP PDF: company logo skipped: ' . $e->getMessage()); }
+            $this->setRTL($ar);
+        }
         $this->SetXY($m, 9);
         $this->SetFont('dejavusans', '', 8);
-        $this->Cell($w - 2 * $m - 36, 5, bd(rt('pdf.number', $r['lang']) . ': ' . $r['number'], $ar), 0, 2, $ar ? 'L' : 'R');
-        $this->Cell($w - 2 * $m - 36, 5, bd(rt('pdf.date', $r['lang']) . ': ' . rdate($r['date'], $r['lang']) . ' ' . $r['time'], $ar), 0, 2, $ar ? 'L' : 'R');
+        $this->Cell($w - 2 * $m - 36 - $gap, 5, bd(rt('pdf.number', $r['lang']) . ': ' . $r['number'], $ar), 0, 2, $ar ? 'L' : 'R');
+        $this->Cell($w - 2 * $m - 36 - $gap, 5, bd(rt('pdf.date', $r['lang']) . ': ' . rdate($r['date'], $r['lang']) . ' ' . $r['time'], $ar), 0, 2, $ar ? 'L' : 'R');
         $this->SetDrawColor(52, 211, 153);
         $this->SetLineWidth(0.6);
         $this->Line($m, 25, $w - $m, 25);
         $this->SetLineWidth(0.2);
+    }
+
+    /* the company's uploaded photo, if TCPDF can read it here: JPEG always; PNG only with GD (transparency); WebP never */
+    private function companyLogo(): ?string {
+        $rel = (string)($this->r['logo'] ?? '');
+        if ($rel === '' || !preg_match('#^avatars/[A-Za-z0-9_.-]+$#', $rel)) return null;
+        $path = ECOOP_ROOT . '/storage/' . $rel;
+        if (!is_file($path)) return null;
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        if ($ext === 'jpg' || $ext === 'jpeg') return $path;
+        if ($ext === 'png' && (extension_loaded('gd') || extension_loaded('imagick'))) return $path;
+        return null;
     }
 
     public function Footer(): void {

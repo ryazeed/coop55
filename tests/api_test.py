@@ -330,6 +330,15 @@ for kind, sess in allowed.items():
         check('report %s: PDF file (%s)' % (kind, lang), ok_pdf, c if isinstance(r, dict) else r.headers.get('Content-Type'))
 c, r = report(eastS, 'company', 'en', 'pdf'); txt = pdf_text(r)
 check('company PDF: letterhead, title, report number, trainees and supervisor', all(w in txt for w in ('Jubail Industrial College', 'Trainee report', 'RPT-COM-', 'Almousa', 'abdullah.alrumi@jic.edu.sa', 'Prepared by', 'Page 1 of')), txt[:400])
+# the company's photo / logo is printed in the PDF header when it has one (JPEG, as the Settings page saves it)
+imgs = lambda resp: resp.content.count(b'/Subtype /Image')
+before = imgs(report(eastS, 'company', 'en', 'pdf')[1])
+JPG = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA='
+check('company logo saved', eastS.act(type='avatar', photo=JPG)['ok'])
+c, r = report(eastS, 'company', 'ar', 'pdf'); c2, r2 = report(eastS, 'company', 'en', 'pdf')
+check('company logo printed in the PDF header (en and ar)', c == 200 and c2 == 200 and imgs(r) == before + 1 and imgs(r2) == before + 1, (before, imgs(r), imgs(r2)))
+eastS.act(type='avatar', photo=None)
+check('no logo: the PDF still works without it', imgs(report(eastS, 'company', 'en', 'pdf')[1]) == before)
 import unicodedata
 c, r = report(admS, 'placement', 'ar', 'pdf'); txt = unicodedata.normalize('NFKC', pdf_text(r))          # PDF text has the joined letter shapes
 check('Arabic PDF: Arabic letterhead, title and labels', all(w in txt for w in ('كلية الجبيل الصناعية', 'التوظيف حسب التخصص', 'الإجمالي', 'أعدّه'.replace('ّ', ''))) or all(w in txt for w in ('كلية الجبيل الصناعية', 'الإجمالي')), txt[:300])

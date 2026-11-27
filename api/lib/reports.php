@@ -131,6 +131,8 @@ function report_company(array $me, array $q, string $lang): array {
     $oppName = $opp ? (string)val('SELECT title FROM coop_opportunities WHERE opportunity_id = ? AND company_id = ?', [$opp, $me['company_id']]) : '';
     return [
         'title' => rt('company.report_title', $lang) . ' · ' . $company, 'file' => 'Trainee_Report',
+        // the company's profile photo / logo (if it uploaded one) is printed at the top of the PDF
+        'logo' => (string)val('SELECT u.avatar_path FROM companies c JOIN users u ON u.user_id = c.user_id WHERE c.company_id = ?', [$me['company_id']]),
         'filters' => $oppName !== '' ? $oppName : rt('company.all_opps', $lang), 'note' => rt('attReviewNote', $lang),
         'cols' => report_cols([['student', 'colStudent', 0, 0, 1.6], ['opportunity', 'colOpportunity', 0, 0, 1.6], ['training', 'colStatus', 0, 1, .8],
             ['days', 'colDays', 1, 0, .72], ['approved', 'colApproved', 1, 0, .82], ['pending', 'colPending', 1, 0, .78], ['rejected', 'colRejected', 1, 0, .8],
