@@ -123,7 +123,7 @@ function renderSupEvals() {
   setHTML('eval-list', (evals.length ? evalRows(evals, true) : '') + waiting || emptyBox('star', t('eval.waiting')));
 }
 
-/* ---------- Cohort report (UC-17): table, CSV, print ---------- */
+/* ---------- Cohort report (UC-17): table, CSV, PDF (calculated in PHP) ---------- */
 var academicReady = false;
 
 function renderAcademic() {
@@ -138,25 +138,5 @@ function renderAcademic() {
     ['ar-major', 'ar-pl'].forEach(function (id) { document.getElementById(id).onchange = renderAcademic; });
     academicReady = true;
   }
-  var major = document.getElementById('ar-major').value, pl = document.getElementById('ar-pl').value;
-  var list = mine.filter(function (x) { return (!major || x.major === major) && (!pl || x.placement === pl); });
-
-  var rows = list.map(function (x) {
-    var c = attCounts(x.id), o = x.placement ? oppOfPlacement(x.placement) : null, rep = reportOf(x.id);
-    return { student: studentName(x.id), major: x.major, placement: o ? companyName(o.company) + ' · ' + o.title : '—', days: c.days, approved: c.approved,
-      pending: c.pending, rejected: c.rejected, att: x.placement ? attendanceRate(x.id) + '%' : '—', report: rep ? rep.status : 'Not submitted',
-      cScore: dash(latestScore(x.id, 'Company')), aScore: dash(latestScore(x.id, 'Academic')) };
-  });
-  var cols = [['student', 'colStudent'], ['major', 'colMajor'], ['placement', 'colPlacement'], ['days', 'colDays', 1], ['approved', 'colApproved', 1],
-    ['pending', 'colPending', 1], ['rejected', 'colRejected', 1], ['att', 'colAttRate', 1], ['report', 'colReport', 0, 1], ['cScore', 'colCompanyScore', 1], ['aScore', 'colAcademicScore', 1]];
-  var placed = list.filter(function (x) { return x.placement; });
-  var avgAtt = average(placed.map(function (x) { return attendanceRate(x.id); }));
-  var approved = rows.filter(function (r) { return r.report === 'Approved'; }).length;
-  var avgC = average(list.map(function (x) { return latestScore(x.id, 'Company'); }));
-  var filters = t('semester') + ' 481 · ' + (major || t('opp.all_majors')) + ' · ' + (pl ? document.getElementById('ar-pl').selectedOptions[0].textContent : t('allPlacements'));
-
-  showReport({
-    title: t('academicReportsTitle'), file: 'E-COOP_Academic_Report_' + TODAY, logName: 'academic cohort', filters: filters, cols: cols, rows: rows,
-    stats: [[t('stStudents'), rows.length], [t('stAvgAtt'), avgAtt == null ? '—' : avgAtt + '%'], [t('stReportsApproved'), approved + ' / ' + rows.length], [t('stAvgCompany'), avgC == null ? '—' : avgC + '/100']]
-  });
+  loadReport('cohort', { major: document.getElementById('ar-major').value, placement: document.getElementById('ar-pl').value });
 }

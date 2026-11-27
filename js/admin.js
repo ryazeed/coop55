@@ -207,68 +207,11 @@ function renderContactInbox() {
   }).join('') : emptyBox('mail', t('admin.no_contact')));
 }
 
-/* ---------- Institutional reports (FR-21): table, CSV, print ---------- */
+/* ---------- Institutional reports (FR-21): table, CSV, PDF (calculated in PHP) ---------- */
 var reportKind = 'placement';
 
 function renderInstReports() {
   setText('lead', t('instReportsLead'));
   setupChips('report-kind', 'data-kind', reportKind, function (v) { reportKind = v; renderInstReports(); });
-  var active = activeStudents();
-  var files = { placement: 'Placement_by_Major', companies: 'Company_Participation', completion: 'Completion_and_Evaluations' };
-  var r = { file: 'E-COOP_' + files[reportKind] + '_' + TODAY, filters: t('semester') + ' 481' };
-
-  if (reportKind === 'placement') {
-    var majors = [];
-    active.forEach(function (x) { if (majors.indexOf(x.major) < 0) majors.push(x.major); });
-    var T = { n: 0, p: 0, a: 0, acc: 0 };
-    r.rows = majors.sort().map(function (m) {
-      var st = active.filter(function (x) { return x.major === m; }), ids = st.map(function (x) { return x.id; });
-      var placedN = st.filter(function (x) { return x.placement; }).length;
-      var apps = S.apps.filter(function (a) { return ids.indexOf(a.student) >= 0; });
-      var acc = apps.filter(function (a) { return a.status === 'Accepted'; }).length;
-      T.n += st.length; T.p += placedN; T.a += apps.length; T.acc += acc;
-      return { major: m, students: st.length, placed: placedN, unplaced: st.length - placedN, rate: Math.round(placedN * 100 / st.length) + '%', apps: apps.length, acc: acc };
-    });
-    var totalRate = T.n ? Math.round(T.p * 100 / T.n) : 0;
-    r.totalRow = { major: t('total'), students: T.n, placed: T.p, unplaced: T.n - T.p, rate: totalRate + '%', apps: T.a, acc: T.acc };
-    r.title = t('rPlacement');
-    r.cols = [['major', 'colMajor'], ['students', 'colStudents', 1], ['placed', 'colPlaced', 1], ['unplaced', 'colUnplaced', 1], ['rate', 'colPlacementRate', 1], ['apps', 'colApplications', 1], ['acc', 'colAccepted', 1]];
-    r.stats = [[t('stStudents'), T.n], [t('stPlacementRate'), totalRate + '%'], [t('colApplications'), T.a]];
-  } else if (reportKind === 'companies') {
-    r.rows = S.companies.map(function (c) {
-      var opps = S.opps.filter(function (o) { return o.company === c.id; }), oids = opps.map(function (o) { return o.id; });
-      var open = opps.filter(function (o) { return o.status === 'Open'; });
-      var apps = S.apps.filter(function (a) { return oids.indexOf(a.opp) >= 0; });
-      var pids = S.placements.filter(function (p) { return oids.indexOf(p.opp) >= 0; }).map(function (p) { return p.id; });
-      var trainees = S.students.filter(function (x) { return pids.indexOf(x.placement) >= 0; });
-      return { company: c.name, city: cityLabel(c.city, LANG), status: c.status, opps: open.length + ' / ' + opps.length,
-        seats: open.reduce(function (sum, o) { return sum + o.capacity; }, 0), apps: apps.length,
-        acc: apps.filter(function (a) { return a.status === 'Accepted'; }).length, trainees: trainees.length,
-        score: dash(average(trainees.map(function (x) { return latestScore(x.id, 'Company'); }))) };
-    });
-    r.title = t('rCompanies');
-    r.cols = [['company', 'colCompany'], ['city', 'colCity'], ['status', 'colStatus', 0, 1], ['opps', 'colOpps', 1], ['seats', 'colSeats', 1], ['apps', 'colApplications', 1],
-      ['acc', 'colAccepted', 1], ['trainees', 'colTrainees', 1], ['score', 'colAvgScore', 1]];
-    r.stats = [[t('stCompanies'), S.companies.filter(function (c) { return c.status === 'Approved'; }).length + ' / ' + S.companies.length],
-      [t('colTrainees'), r.rows.reduce(function (sum, x) { return sum + x.trainees; }, 0)]];
-  } else {
-    var placed = S.students.filter(function (x) { return x.placement; });
-    r.rows = placed.map(function (x) {
-      var o = oppOfPlacement(x.placement), rep = reportOf(x.id);
-      var repSt = rep ? rep.status : 'Not submitted', cS = latestScore(x.id, 'Company'), aS = latestScore(x.id, 'Academic');
-      var done = repSt === 'Approved' && cS != null && aS != null;
-      return { student: studentName(x.id), major: x.major, company: companyName(o.company), sup: supervisorName(x.supervisor) || '—',
-        att: attendanceRate(x.id) + '%', report: repSt, cScore: dash(cS), aScore: dash(aS), status: done ? 'Completed' : 'In progress' };
-    });
-    var doneN = r.rows.filter(function (x) { return x.status === 'Completed'; }).length;
-    var cr = r.rows.length ? Math.round(doneN * 100 / r.rows.length) : 0;
-    var aa = average(placed.map(function (x) { return attendanceRate(x.id); }));
-    r.title = t('rCompletion');
-    r.cols = [['student', 'colStudent'], ['major', 'colMajor'], ['company', 'colCompany'], ['sup', 'colSupervisor'], ['att', 'colAttRate', 1],
-      ['report', 'colReport', 0, 1], ['cScore', 'colCompanyScore', 1], ['aScore', 'colAcademicScore', 1], ['status', 'colStatus', 0, 1]];
-    r.stats = [[t('stCompletion'), cr + '%'], [t('stAvgAtt'), aa == null ? '—' : aa + '%'],
-      [t('stReportsApproved'), r.rows.filter(function (x) { return x.report === 'Approved'; }).length + ' / ' + r.rows.length]];
-  }
-  r.logName = r.title.toLowerCase();
-  showReport(r);
+  loadReport(reportKind, {});
 }

@@ -222,31 +222,79 @@ check('contact inbox: other roles get nothing', east.state()['state']['contacts'
 rej = [x for x in admin.state()['state']['apps'] if x.get('reason')]
 check('rejection reason: hidden from other users', rej and not [x for x in g.state()['state']['apps'] if x.get('reason')], len(rej))
 
-# ---------------------------------------------------------------- company trainee report (api/report.php)
-def report(sess, q=''):
-    r = sess.s.get(BASE + '/api/report.php' + q); return r.status_code, r.json()
-code_, rp = report(U('coop@easternlogistics.sa'))
-names = sorted(x['student'] for x in rp['rows'])
+# ---------------------------------------------------------------- reports (api/report.php): calculated in PHP, shown as a table or downloaded as PDF
+import subprocess, tempfile, os
+def report(sess, kind='company', lang='en', fmt='', **q):
+    r = sess.s.get(BASE + '/api/report.php', params=dict(kind=kind, lang=lang, format=fmt, **q))
+    if fmt == 'pdf' and r.headers.get('Content-Type') == 'application/pdf': return r.status_code, r
+    return r.status_code, r.json()
+def pdf_text(resp):
+    f = tempfile.NamedTemporaryFile(suffix='.pdf', delete=False); f.write(resp.content); f.close()
+    out = subprocess.run(['pdftotext', '-layout', f.name, '-'], capture_output=True, text=True).stdout; os.unlink(f.name); return out
+
+eastS = U('coop@easternlogistics.sa')
+code_, j = report(eastS); rp = j['report']
+names = sorted(x['student'].split('\n')[0] for x in rp['rows'])
 full = admin.state()['state']                                            # the truth: students placed in Eastern Logistics' opportunities
 east_opps = {o['id'] for o in full['opps'] if o['company'] == 'c2'}
 east_pls = {p['id'] for p in full['placements'] if p['opp'] in east_opps}
 expect = sorted([u['name'] for x in full['students'] if x['placement'] in east_pls for u in full['users'] if u['id'] == x['user']])
-check('trainee report: company sees exactly its own trainees', code_ == 200 and rp['ok'] and names == expect and len(names) >= 3, (names, expect))
-row = [x for x in rp['rows'] if x['student'] == 'Ahmed Abdulmohsen Almousa'][0]
-check('trainee report: supervisor name, department, e-mail and phone', row['supervisor'] == 'Abdullah Rashed Alrumi' and row['supEmail'] == 'abdullah.alrumi@jic.edu.sa' and row['supDept'] and row['supPhone'], row)
-check('trainee report: attendance counts from the supervisor review', row['approved'] + row['pending'] == row['days'] and isinstance(row['rejected'], int) and 0 <= row['rate'] <= 100)
-check('trainee report: final report status without the supervisor comments', 'report' in row and not any('comment' in k.lower() for k in row))
-check('trainee report: both evaluation scores', 'companyScore' in row and 'academicScore' in row)
-check('trainee report: stats match the rows', rp['stats']['trainees'] == len(rp['rows']) and rp['stats']['reportsApproved'] == len([x for x in rp['rows'] if x['report'] == 'Approved']))
-_, gp = report(U('training@gulfpetrochem.sa'))
-check('trainee report: another company gets other trainees', gp['rows'] and not set(x['student'] for x in gp['rows']) & set(names))
-_, gp2 = report(U('training@gulfpetrochem.sa'), '?opp=o2')
-check('trainee report: asking for another company\'s opportunity returns nothing', gp2['ok'] and gp2['rows'] == [])
-_, f = report(U('coop@easternlogistics.sa'), '?opp=o99999')
-check('trainee report: unknown opportunity returns nothing', f['ok'] and f['rows'] == [])
-for who, mail, want in (('student', 'ahmed.almousa@jic.edu.sa', 403), ('supervisor', 'abdullah.alrumi@jic.edu.sa', 403), ('admin', 'coop.office@jic.edu.sa', 403)):
-    c, j = report(U(mail)); check('trainee report: %s cannot open it' % who, c == want and j['code'] == 'forbidden', c)
-c, j = report(U()); check('trainee report: sign-in required', c == 401 and j['code'] == 'auth')
+check('trainee report: company sees exactly its own trainees', code_ == 200 and j['ok'] and names == expect and len(names) >= 3, (names, expect))
+row = [x for x in rp['rows'] if x['student'].startswith('Ahmed Abdulmohsen Almousa')][0]
+check('trainee report: supervisor name, department, e-mail and phone', row['supervisor'].split('\n')[:1] == ['Abdullah Rashed Alrumi'] and 'abdullah.alrumi@jic.edu.sa' in row['supervisor'] and len(row['supervisor'].split('\n')) == 4, row['supervisor'])
+check('trainee report: attendance counts from the supervisor review', row['approved'] + row['pending'] == row['days'] and isinstance(row['rejected'], int) and row['rate'].endswith('%'))
+check('trainee report: final report status without the supervisor comments', row['report'] in ('Not submitted', 'Submitted', 'Approved', 'Request Revision') and 'comment' not in json.dumps(rp).lower())
+check('trainee report: both evaluation scores and the columns', [c['key'] for c in rp['cols']][-3:] == ['cScore', 'aScore', 'supervisor'] and 'cScore' in row and 'aScore' in row)
+check('trainee report: stats match the rows', rp['stats'][0][1] == str(len(rp['rows'])))
+_, gj = report(U('training@gulfpetrochem.sa'))
+check('trainee report: another company gets other trainees', gj['report']['rows'] and not {x['student'].split('\n')[0] for x in gj['report']['rows']} & set(names))
+_, gj2 = report(U('training@gulfpetrochem.sa'), opp='o2')
+check('trainee report: asking for another company\'s opportunity returns nothing', gj2['ok'] and gj2['report']['rows'] == [])
+_, gj3 = report(eastS, opp='o99999')
+check('trainee report: unknown opportunity returns nothing', gj3['ok'] and gj3['report']['rows'] == [])
+_, ja = report(eastS, lang='ar')
+check('trainee report: Arabic labels', ja['report']['cols'][0]['label'] == 'الطالب' and 'تقرير المتدربين' in ja['report']['title'])
+
+# who may open which report
+supS, admS, stuS = U('abdullah.alrumi@jic.edu.sa'), U('coop.office@jic.edu.sa'), U('ahmed.almousa@jic.edu.sa')
+allowed = {'company': eastS, 'cohort': supS, 'placement': admS, 'companies': admS, 'completion': admS}
+for kind, sess in allowed.items():
+    c, j = report(sess, kind); check('report %s: its role opens it' % kind, c == 200 and j['ok'] and j['report']['cols'], j.get('error'))
+    for other in [x for x in (eastS, supS, admS, stuS) if x is not sess]:
+        c, j = report(other, kind)
+        if c != 403 or j.get('code') != 'forbidden': check('report %s: other roles are refused' % kind, False, c); break
+    else: check('report %s: other roles are refused' % kind, True)
+c, j = report(U(), 'placement'); check('reports: sign-in required', c == 401 and j['code'] == 'auth')
+c, j = report(admS, 'everything'); check('reports: unknown report kind', c == 404)
+
+# the numbers are calculated in PHP: compare with the database directly
+_, coh = report(supS, 'cohort')
+mine = [x for x in full['students'] if x['supervisor'] == 'sup1']
+check('cohort report: only the supervisor\'s own students', len(coh['report']['rows']) == len(mine) and coh['report']['stats'][0][1] == str(len(mine)), (len(coh['report']['rows']), len(mine)))
+_, coh2 = report(supS, 'cohort', major='Chemical Engineering')
+check('cohort report: filter by major', all(r['major'] == 'Chemical Engineering' for r in coh2['report']['rows']) and len(coh2['report']['rows']) < len(mine))
+_, pm = report(admS, 'placement')
+active = [x for x in full['students'] for u in full['users'] if u['id'] == x['user'] and u['status'] == 'Active']
+check('placement report: totals match the database', pm['report']['total']['students'] == len(active) and pm['report']['total']['placed'] == len([x for x in active if x['placement']]), pm['report']['total'])
+_, cp = report(admS, 'companies')
+check('company participation: one row per company', len(cp['report']['rows']) == len(full['companies']))
+_, cm = report(admS, 'completion')
+check('completion report: one row per placed student', len(cm['report']['rows']) == len([x for x in full['students'] if x['placement']]))
+
+# PDF files
+for kind, sess in allowed.items():
+    for lang in ('en', 'ar'):
+        c, r = report(sess, kind, lang, 'pdf')
+        ok_pdf = c == 200 and not isinstance(r, dict) and r.content[:5] == b'%PDF-' and 'attachment' in r.headers.get('Content-Disposition', '')
+        check('report %s: PDF file (%s)' % (kind, lang), ok_pdf, c if isinstance(r, dict) else r.headers.get('Content-Type'))
+c, r = report(eastS, 'company', 'en', 'pdf'); txt = pdf_text(r)
+check('company PDF: letterhead, title, report number, trainees and supervisor', all(w in txt for w in ('Jubail Industrial College', 'Trainee report', 'RPT-COM-', 'Almousa', 'abdullah.alrumi@jic.edu.sa', 'Prepared by', 'Page 1 of')), txt[:400])
+import unicodedata
+c, r = report(admS, 'placement', 'ar', 'pdf'); txt = unicodedata.normalize('NFKC', pdf_text(r))          # PDF text has the joined letter shapes
+check('Arabic PDF: Arabic letterhead, title and labels', all(w in txt for w in ('كلية الجبيل الصناعية', 'التوظيف حسب التخصص', 'الإجمالي', 'أعدّه'.replace('ّ', ''))) or all(w in txt for w in ('كلية الجبيل الصناعية', 'الإجمالي')), txt[:300])
+c, r = report(stuS, 'company', 'en', 'pdf'); check('PDF: a student cannot download a company report', c == 403)
+logs = [l['action'] for l in admS.state()['state']['audit']]
+check('PDF downloads are written to the audit log', any('Exported company report (PDF) RPT-COM-' in a for a in logs), logs[:5])
 
 check('logout ends the session', ahmed.post('auth.php', op='logout')['me'] is None and ahmed.act(type='readNotifs')['code'] == 'auth')
 

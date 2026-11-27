@@ -184,6 +184,9 @@ function ok(name, cond, info) {
   const [csv0] = await Promise.all([p.waitForEvent('download'), p.click('#csv-btn')]);
   const csvText = fs.readFileSync(await csv0.path(), 'utf8');
   ok('trainee report downloads as CSV with the supervisor contact', /Trainee_Report/.test(csv0.suggestedFilename()) && /abdullah\.alrumi@jic\.edu\.sa/.test(csvText) && /Academic supervisor/.test(csvText));
+  const [pdf0] = await Promise.all([p.waitForEvent('download'), p.click('#pdf-btn')]);
+  const pdfBytes = fs.readFileSync(await pdf0.path());
+  ok('trainee report downloads as a real PDF file', /\.pdf$/.test(pdf0.suggestedFilename()) && pdfBytes.slice(0, 5).toString() === '%PDF-' && pdfBytes.length > 20000, pdf0.suggestedFilename());
   await p.selectOption('#cr-opp', { label: 'Supply Chain Analyst Trainee' }); await p.waitForTimeout(800);
   ok('trainee report filters by opportunity', await p.locator('#report-body tr').count() === 3 && !/Yazeed/.test(await text(p, '#report-body')));
   await go(p, '/company/profile.html');
@@ -226,6 +229,8 @@ function ok(name, cond, info) {
   await go(p, '/supervisor/export.html');
   const [csv] = await Promise.all([p.waitForEvent('download'), p.click('#csv-btn')]);
   ok('cohort report downloads as CSV', /\.csv$/.test(csv.suggestedFilename()) && await p.locator('#report-body tr').count() >= 3);
+  const [pdf1] = await Promise.all([p.waitForEvent('download'), p.click('#pdf-btn')]);
+  ok('cohort report downloads as an Arabic PDF', /Academic_Report.*\.pdf$/.test(pdf1.suggestedFilename()) && fs.readFileSync(await pdf1.path()).slice(0, 5).toString() === '%PDF-');
   await ctx.close();
 
   // ---------------------------------------------------------------- student: sees the decisions
@@ -276,6 +281,12 @@ function ok(name, cond, info) {
   await p.locator('#report-kind .co-chip[data-kind="companies"]').click(); await p.waitForTimeout(300);
   const [csv2] = await Promise.all([p.waitForEvent('download'), p.click('#csv-btn')]);
   ok('institutional report downloads as CSV', /Company_Participation/.test(csv2.suggestedFilename()));
+  const [pdf2] = await Promise.all([p.waitForEvent('download'), p.click('#pdf-btn')]);
+  ok('institutional report downloads as a PDF', /Company_Participation.*\.pdf$/.test(pdf2.suggestedFilename()) && fs.readFileSync(await pdf2.path()).slice(0, 5).toString() === '%PDF-');
+  for (const k of ['placement', 'completion']) {
+    await p.locator('#report-kind .co-chip[data-kind="' + k + '"]').click(); await p.waitForTimeout(700);
+    ok('admin report "' + k + '" shows rows calculated by PHP', await p.locator('#report-body tr').count() >= 3);
+  }
   await go(p, '/admin/audit-logs.html');
   ok('audit log lists the actions', await p.locator('#audit-body tr').count() > 20 && /Marked placement completed/.test(await text(p, '#audit-body')));
   await go(p, '/admin/contact-messages.html');

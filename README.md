@@ -54,7 +54,7 @@ A complete web system for managing cooperative training (COOP): students apply t
 3. **المشرف** ← **Attendance** ← **Approve**، أو **Reject** مع كتابة السبب.
 4. **الطالب** (yazeed) ← **Opportunities** ← افتح "Procurement Analyst Trainee": الحد الأدنى للمعدل 3.75 ومعدله 3.52، فالتقديم مقفل.
 5. **الأدمن** ← **Audit log**: كل اللي صار مسجّل باسم صاحبه ووقته.
-6. **الشركة** ← **Trainee report**: المتدربين وحضورهم وتقريرهم النهائي وتقييماتهم ومشرفهم الأكاديمي وطريقة التواصل معه، مع طباعة و CSV.
+6. **الشركة** ← **Trainee report** ← **Download PDF**: ملف PDF رسمي (ترويسة الكلية، رقم التقرير، الملخص، الجدول، التوقيعات) فيه المتدربين وحضورهم وتقريرهم النهائي وتقييماتهم ومشرفهم الأكاديمي. ونفس الشي في تقرير المشرف وتقارير الأدمن الثلاثة، بالعربي أو الإنجليزي حسب لغة الصفحة.
 7. **Messages**: أي دور يراسل الثاني، والرسالة تظهر عند الطرف الثاني خلال 5 ثواني.
 
 لو تبي ترجع الديمو من البداية: افتح `install.php` مرة ثانية.
@@ -100,16 +100,18 @@ coop55/
 │   ├── state.php           GET  – the signed-in user + the data for the pages
 │   ├── auth.php            POST – login / logout / register
 │   ├── action.php          POST – every change (apply, accept, check-in, approve …)
-│   ├── report.php          GET  – company trainee report (only that company's trainees)
+│   ├── report.php          GET  – the 5 reports as a table (JSON) or as an official PDF file (?format=pdf)
 │   ├── upload.php          POST – final report upload (PDF/DOCX, 10 MB)
 │   ├── file.php            GET  – open a report / profile photo (with permission check)
-│   └── lib/                bootstrap.php (PDO, sessions, errors), state.php, actions.php
+│   └── lib/                bootstrap.php (PDO, sessions, errors), state.php, actions.php,
+│                           reports.php (the 5 reports, calculated in PHP), report_pdf.php (PDF layout),
+│                           tcpdf/ (TCPDF 6.11.4 PDF library, LGPL – Arabic and English), lang.json (report texts)
 ├── install.php             one-click database setup / demo reset
 ├── router.php              router for "php -S" (blocks private folders)
 ├── database/ecoop.sql      schema + rules + demo data (one file)
 ├── storage/                uploaded files (not public)
 ├── docs/ERD.png, ERD.pdf   the numbered ERD
-└── tests/                  api_test.py (135 API checks), ui_test.js (86 browser checks)
+└── tests/                  api_test.py (163 API checks), ui_test.js (91 browser checks)
 ```
 
 ### How a request works
@@ -139,14 +141,15 @@ coop55/
 | BR-18 one final report per student | `act_submitReport` | `UNIQUE (student_id)` |
 | BR-19 one company + one academic evaluation | `act_submitEval` | `UNIQUE (student_id, placement_id, evaluator_type)` |
 | UC-16 academic evaluation after completion + approved report | `act_completePlacement` (admin) | trigger `trg_eval_academic_precondition` |
-| Company trainee report: own trainees only, supervisor comments hidden | `api/report.php` (company_id in the SQL) | – |
+| Reports: each role gets only its own report and data; PDF built on the server | `api/report.php`, `lib/reports.php` (role + company_id / supervisor_id in the SQL), audit log on every PDF | – |
+| Company trainee report: supervisor comments hidden | `report_company()` | – |
 | Chat: only members read and send | `build_state`, `my_conversation()` | FK `messages (conversation_id, sender_id)` → `conversation_members` |
 | BR-04 audit log cannot be edited | `audit()` on every action | triggers `trg_audit_no_update`, `trg_audit_no_delete` |
 
 ### Tests
 With the server running on port 8000:
 ```
-python tests/api_test.py http://localhost:8000     # 135 checks: every action, permissions and database rules
-node tests/ui_test.js http://localhost:8000         # 86 checks in a real browser: every role's buttons and forms (needs: npm i playwright)
+python tests/api_test.py http://localhost:8000     # 163 checks: every action, permissions and database rules
+node tests/ui_test.js http://localhost:8000         # 91 checks in a real browser: every role's buttons and forms (needs: npm i playwright)
 ```
 The tests reset the demo database first.
